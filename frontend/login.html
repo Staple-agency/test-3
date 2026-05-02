@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AdvoHQ — Case Management</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --ink: #2d3748;
+      --ink-2: #3a4a5c;
+      --ink-3: #4a5a6e;
+      --ink-4: #6b7a8d;
+      --line: #d0d4db;
+      --line-soft: #dde0e5;
+      --surface: #ffffff;
+      --surface-2: #e8eaed;
+      --surface-3: #dde0e5;
+      --accent: #c9a84c;
+      --danger: #b91c1c;
+      --warn: #92400e;
+      --success: #166534;
+      --r-sm: 12px;
+      --r-md: 20px;
+      --r-lg: 28px;
+      --r-xl: 40px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.04);
+      --shadow-lg: 0 16px 40px rgba(0,0,0,0.10), 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--surface-2);
+      color: var(--ink);
+      min-height: 100vh;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* ─── SCROLLBAR ─── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 99px; }
+
+    /* ─── TYPOGRAPHY ─── */
+    h1, h2, h3 { font-family: 'Instrument Serif', serif; font-weight: 400; }
+    h1 { font-size: 2.2rem; line-height: 1.1; }
+    h2 { font-size: 1.5rem; }
+    h3 { font-size: 1.15rem; }
+
+    /* ─── LAYOUT ─── */
+    #app { min-height: 100vh; }
+
+    .page-wrap {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* ─── NAVBAR ─── */
+    .navbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .navbar-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 60px;
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    .logo {
+      font-family: 'Playfair Display', 'Instrument Serif', serif;
+      font-size: 1.6rem;
+      font-weight: 500;
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+    }
+    .logo-advo { color: #1e2d4a; }
+    .logo-hq   { color: #b8922a; }
+
+    .logo-dot {
+      width: 6px;
+      height: 6px;
+      background: #1e3a5f;
+      border-radius: 50%;
+      display: inline-block;
+      margin-bottom: 2px;
+      margin-left: 0.5rem;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .nav-user {
+      font-size: 0.8rem;
+      color: var(--ink-3);
+      font-weight: 500;
+    }
+
+    .btn-ghost {
+      background: none;
+      border: 1px solid var(--line);
+      color: var(--ink-3);
+      padding: 0.35rem 0.9rem;
+      border-radius: var(--r-xl);
+      cursor: pointer;
+      font-size: 0.78rem;
+      font-family: 'DM Sans', sans-serif;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.15s;
+    }
+    .btn-ghost:hover {
+      background: var(--surface-2);
+      border-color: var(--ink-4);
+      color: var(--ink);
+    }
+
+    /* ─── BUTTONS ─── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.55rem 1.2rem;
+      border-radius: var(--r-xl);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: #1e3a5f;
+      color: #fff;
+    }
+    .btn-primary:hover { background: #2a4a72; }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--line);
+      color: var(--ink-3);
+    }
+    .btn-outline:hover { border-color: var(--ink-4); color: var(--ink); background: var(--surface-2); }
+
+    .btn-sm {
+      padding: 0.3rem 0.8rem;
+      font-size: 0.75rem;
+    }
+
+    /* ─── LOGIN ─── */
+    .login-wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+      background: var(--surface-2);
+      background-image: radial-gradient(circle at 20% 20%, rgba(0,0,0,0.03) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(0,0,0,0.02) 0%, transparent 50%);
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 420px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--r-lg);
+      padding: 2.5rem;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .login-logo {
+      font-family: 'Playfair Display', 'Instrument Serif', serif;
+      font-size: 2.2rem;
+      font-weight: 500;
+      letter-spacing: -0.3px;
+      margin-bottom: 0.25rem;
+    }
+
+    .login-sub {
+      font-size: 0.82rem;
+      color: var(--ink-4);
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--line-soft);
+      padding-bottom: 1.5rem;
+    }
+
+    .field { margin-bottom: 1.1rem; }
+    .field label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--ink-3);
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .field input {
+      width: 100%;
+      padding: 0.65rem 1rem;
+      border: 1px solid var(--line);
+      border-radius: var(--r-md);
+      background: var(--surface);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      color: var(--ink);
+      transition: border-color 0.15s;
+    }
+    .field input:focus {
+      outline: none;
+      border-color: var(--ink);
+    }
+
+    .login-btn-full {
+      width: 100%;
+      margin-top: 0.5rem;
+      padding: 0.75rem;
+      justify-content: center;
+      font-size: 0.9rem;
+    }
+
+    .error-msg {
+      font-size: 0.78rem;
+      color: var(--danger);
+      margin-top: 0.8rem;
+      text-align: center;
+      min-height: 1.2em;
+    }
+
+    .login-hint {
+      font-size: 0.72rem;
+      color: var(--ink-4);
+      text-align: center;
+      margin-top: 1.5rem;
+      border-top: 1px solid var(--line-soft);
+      padding-top: 1rem;
+    }
+    .login-hint code {
+      background: var(--surface-3);
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+    }
+
+
+
+    /* ─── OR DIVIDER ─── */
+    .or-divider {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin: 1.1rem 0;
+      color: var(--ink-4);
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .or-divider::before,
+    .or-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--line);
+    }
+
+    /* ─── DASHBOARD ─── */
+    .dashboard-wrap { padding: 1.5rem 0 4rem; }
+
+    .dash-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .dash-title {
+      font-family: 'Instrument Serif', serif;
+      font-size: 1.4rem;
+      color: var(--ink);
+    }
+
+    .dash-meta {
+      font-size: 0.78rem;
+      color: var(--ink-4);
+      margin-top: 0.1rem;
+    }
+
+    /* ─── NOTIFICATION BANNER ─── */
+    .notif-banner {
+      background: #1e3a5f;
+      color: #fff;
+      border-radius: var(--r-md);
+      padding: 0.8rem 1.2rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      font-size: 0.82rem;
+      animation: slideIn 0.3s ease;
+    }
+    .notif-banner i { font-size: 1rem; }
+    .notif-banner-list { flex: 1; }
+    .notif-banner-item { margin-bottom: 0.15rem; }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── CASES GRID ─── */
+    .cases-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 1.2rem;
+    }
+
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 5rem 2rem;
+      color: var(--ink-4);
+    }
+    .empty-state i { font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.3; display: block; }
+    .empty-state p { font-size: 0.9rem; }
+
+    /* ─── CASE CARD ─── */
+    .case-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--r-lg);
+      overflow: hidden;
+      transition: box-shadow 0.15s, border-color 0.15s;
+      display: flex;
+      flex-direction: column;
+    }
+    .case-card:hover {
+      box-shadow: var(--shadow-md);
+      border-color: #d0d0d0;
+    }
+
+    .case-card-header {
+      padding: 1.1rem 1.3rem 0.9rem;
+      border-bottom: 1px solid var(--line-soft);
+    }
+
+    .case-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+
+    .case-title-text {
+      font-family: 'Instrument Serif', serif;
+      font-size: 1.05rem;
+      color: var(--ink);
+      line-height: 1.3;
+      flex: 1;
+    }
+
+    .case-date-badge {
+      font-size: 0.68rem;
+      color: var(--ink-4);
+      white-space: nowrap;
+      padding-top: 0.15rem;
+    }
+
+    .case-card-body { padding: 1rem 1.3rem; flex: 1; display: flex; flex-direction: column; gap: 1rem; }
+
+    /* Points section */
+    .points-block {
+      background: var(--surface-2);
+      border-radius: var(--r-md);
+      padding: 0.9rem 1rem;
+    }
+
+    .block-label {
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--ink-4);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .points-preview {
+      font-size: 0.82rem;
+      color: var(--ink-3);
+      white-space: pre-wrap;
+      line-height: 1.55;
+      max-height: 80px;
+      overflow: hidden;
+      mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+    }
+
+    .points-actions { margin-top: 0.6rem; display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+    /* Files section */
+    .files-block { }
+
+    .file-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin: 0.5rem 0;
+    }
+
+    .file-chip {
+      background: var(--surface-3);
+      border-radius: var(--r-xl);
+      padding: 0.2rem 0.7rem;
+      font-size: 0.72rem;
+      color: var(--ink-3);
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      border: 1px solid var(--line);
+    }
+
+    .add-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .add-row input, .add-row select {
+      flex: 1;
+      padding: 0.4rem 0.8rem;
+      border: 1px solid var(--line);
+      border-radius: var(--r-xl);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.78rem;
+      background: var(--surface);
+      color: var(--ink);
+      transition: border-color 0.15s;
+      min-width: 0;
+    }
+    .add-row input:focus, .add-row select:focus { outline: none; border-color: var(--ink); }
+
+    /* Dates section */
+    .dates-block { }
+
+    .date-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin: 0.5rem 0;
+    }
+
+    .date-pill {
+      background: var(--surface-3);
+      border: 1px solid var(--line);
+      border-radius: var(--r-xl);
+      padding: 0.2rem 0.7rem;
+      font-size: 0.72rem;
+      color: var(--ink-3);
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .date-pill.upcoming {
+      background: #0d0d0d;
+      border-color: #0d0d0d;
+      color: #fff;
+    }
+
+    .date-pill.today {
+      background: #7f1d1d;
+      border-color: #7f1d1d;
+      color: #fff;
+    }
+
+    /* ─── MODAL ─── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 500;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      backdrop-filter: blur(2px);
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal-box {
+      background: var(--surface);
+      border-radius: var(--r-lg);
+      padding: 2rem;
+      width: 100%;
+      max-width: 580px;
+      box-shadow: var(--shadow-lg);
+      animation: modalIn 0.2s ease;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.97) translateY(10px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1.2rem;
+    }
+
+    .modal-title {
+      font-family: 'Instrument Serif', serif;
+      font-size: 1.3rem;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--ink-4);
+      font-size: 1.1rem;
+      padding: 0.2rem;
+      line-height: 1;
+    }
+    .modal-close:hover { color: var(--ink); }
+
+    .modal-textarea {
+      width: 100%;
+      min-height: 220px;
+      padding: 1rem;
+      border: 1px solid var(--line);
+      border-radius: var(--r-md);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      line-height: 1.6;
+      color: var(--ink);
+      resize: vertical;
+      transition: border-color 0.15s;
+    }
+    .modal-textarea:focus { outline: none; border-color: var(--ink); }
+
+    .modal-hint {
+      font-size: 0.75rem;
+      color: var(--ink-4);
+      margin-top: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .modal-footer {
+      display: flex;
+      gap: 0.6rem;
+      justify-content: flex-end;
+      margin-top: 1rem;
+    }
+
+    /* ─── AI SUMMARISE ─── */
+    .ai-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: var(--surface-2);
+      border: 1px dashed var(--line);
+      border-radius: var(--r-md);
+      padding: 0.6rem 0.9rem;
+      margin-top: 0.8rem;
+      font-size: 0.78rem;
+      color: var(--ink-4);
+    }
+
+    .ai-bar input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.78rem;
+      color: var(--ink);
+      outline: none;
+    }
+    .ai-bar input::placeholder { color: var(--ink-4); }
+
+    /* ─── TOAST ─── */
+    .toast {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      z-index: 800;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      max-width: 320px;
+    }
+
+    .toast-item {
+      background: #1e3a5f;
+      color: #fff;
+      padding: 0.75rem 1rem;
+      border-radius: var(--r-md);
+      font-size: 0.8rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      box-shadow: var(--shadow-lg);
+      animation: toastIn 0.25s ease;
+    }
+    .toast-item i { margin-top: 1px; flex-shrink: 0; }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    /* ─── SEARCH BAR ─── */
+    .search-wrap {
+      position: relative;
+      flex: 1;
+      max-width: 280px;
+    }
+    .search-wrap i {
+      position: absolute;
+      left: 0.9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--ink-4);
+      font-size: 0.8rem;
+    }
+    .search-input {
+      width: 100%;
+      padding: 0.45rem 0.9rem 0.45rem 2.2rem;
+      border: 1px solid var(--line);
+      border-radius: var(--r-xl);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.8rem;
+      background: var(--surface);
+      color: var(--ink);
+      transition: border-color 0.15s;
+    }
+    .search-input:focus { outline: none; border-color: var(--ink); }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 600px) {
+      .cases-grid { grid-template-columns: 1fr; }
+      .dash-header { flex-direction: column; align-items: flex-start; }
+      .search-wrap { max-width: 100%; width: 100%; }
+    }
+
+    /* ─── DELETE ICON ─── */
+    .delete-chip {
+      cursor: pointer;
+      color: var(--ink-4);
+      margin-left: 2px;
+      font-size: 0.65rem;
+    }
+    .delete-chip:hover { color: var(--danger); }
+
+    /* ─── SECTION DIVIDER ─── */
+    .section-divider {
+      border: none;
+      border-top: 1px solid var(--line-soft);
+      margin: 0;
+    }
+
+    /* ─── CASE CARD FOOTER ─── */
+    .case-card-footer {
+      padding: 0.75rem 1.3rem;
+      border-top: 1px solid var(--line-soft);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .footer-meta {
+      font-size: 0.7rem;
+      color: var(--ink-4);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .notify-dot {
+      width: 7px;
+      height: 7px;
+      background: #1e3a5f;
+      border-radius: 50%;
+      display: inline-block;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* ─── CASE DELETE BTN ─── */
+    .case-delete-btn {
+      background: none;
+      border: none;
+      color: var(--ink-4);
+      cursor: pointer;
+      font-size: 0.78rem;
+      padding: 0.2rem;
+      transition: color 0.15s;
+    }
+    .case-delete-btn:hover { color: var(--danger); }
+  </style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast-container" class="toast"></div>
+
+<div id="points-modal" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 class="modal-title">In-Depth Points</h3>
+      <button class="modal-close" id="close-points-modal"><i class="fas fa-times"></i></button>
+    </div>
+    <p class="modal-hint">Write detailed case points, arguments, evidence notes, or any structured analysis. Supports free text and bullet formatting.</p>
+    <textarea class="modal-textarea" id="points-editor" placeholder="• Point 1&#10;• Point 2&#10;• Key argument..."></textarea>
+    <div class="ai-bar">
+      <i class="fas fa-magic"></i>
+      <input type="text" id="ai-prompt-input" placeholder="Ask AI to summarise or expand these points…">
+      <button class="btn btn-primary btn-sm" id="ai-summarise-btn">Run</button>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" id="cancel-points-btn">Cancel</button>
+      <button class="btn btn-primary" id="save-points-btn">Save Points</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────
+//  DATA LAYER
+// ─────────────────────────────────────────
+const MEMBERS = [];
+for (let i = 1; i <= 35; i++) {
+  MEMBERS.push({ username: `member${i}`, password: `pass${i}`, fullName: `Advocate ${i}` });
+}
+MEMBERS.push({ username: 'advohq', password: 'admin123', fullName: 'Admin User' });
+
+let currentUser = null;
+let cases = [];
+let activePointsCaseId = null;
+let searchQuery = '';
+
+function saveData() {
+  if (currentUser) {
+    localStorage.setItem(`advohq_v2_${currentUser.username}`, JSON.stringify(cases));
+  }
+}
+
+function loadData() {
+  if (!currentUser) return;
+  const raw = localStorage.getItem(`advohq_v2_${currentUser.username}`);
+  if (raw) {
+    cases = JSON.parse(raw).map(c => ({
+      importantDates: [],
+      files: [],
+      points: '',
+      ...c
+    }));
+  } else {
+    cases = [{
+      id: Date.now(),
+      title: 'Sample Civil Suit — Sharma v. Corp Ltd.',
+      createdDate: new Date().toLocaleDateString('en-IN'),
+      files: ['plaint.pdf', 'evidence_A.docx', 'written_statement.pdf'],
+      points: '• Plaintiff alleges breach of contract dated 14 March 2024.\n• Defendant denies liability citing Force Majeure clause (§12).\n• Key witness: Mr. Rajan Sharma — deposition scheduled.\n• Damages claimed: ₹42,00,000 + interest.',
+      importantDates: [
+        { id: Date.now() + 1, dateISO: new Date(Date.now() + 2*86400000).toISOString().slice(0,10), label: 'Next Hearing', notified: false },
+        { id: Date.now() + 2, dateISO: new Date(Date.now() + 10*86400000).toISOString().slice(0,10), label: 'Filing Deadline', notified: false }
+      ]
+    }];
+    saveData();
+  }
+}
+
+// ─────────────────────────────────────────
+//  NOTIFICATIONS CHECK
+// ─────────────────────────────────────────
+function getUpcomingDates() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const results = [];
+  cases.forEach(c => {
+    (c.importantDates || []).forEach(d => {
+      const dt = new Date(d.dateISO); dt.setHours(0,0,0,0);
+      const diff = Math.round((dt - today) / 86400000);
+      if (diff >= 0 && diff <= 3) {
+        results.push({ caseTitle: c.title, label: d.label, dateISO: d.dateISO, diff });
+      }
+    });
+  });
+  return results;
+}
+
+// ─────────────────────────────────────────
+//  TOAST
+// ─────────────────────────────────────────
+function showToast(msg, icon = 'fa-check-circle') {
+  const container = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = 'toast-item';
+  el.innerHTML = `<i class="fas ${icon}"></i><span>${msg}</span>`;
+  container.appendChild(el);
+  setTimeout(() => { el.style.transition = 'opacity 0.4s'; el.style.opacity = '0'; setTimeout(() => el.remove(), 400); }, 3500);
+}
+
+// ─────────────────────────────────────────
+//  ESCAPE
+// ─────────────────────────────────────────
+function esc(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─────────────────────────────────────────
+//  DATE HELPERS
+// ─────────────────────────────────────────
+function dateDiff(isoStr) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const dt = new Date(isoStr); dt.setHours(0,0,0,0);
+  return Math.round((dt - today) / 86400000);
+}
+
+function formatDate(isoStr) {
+  return new Date(isoStr).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+}
+
+// ─────────────────────────────────────────
+//  RENDER
+// ─────────────────────────────────────────
+function render() {
+  const app = document.getElementById('app');
+  if (!currentUser) {
+    app.innerHTML = renderLogin();
+    bindLogin();
+    return;
+  }
+  loadData();
+  app.innerHTML = renderApp();
+  bindApp();
+  checkNotifications();
+}
+
+// ─────────────────────────────────────────
+//  LOGIN VIEW
+// ─────────────────────────────────────────
+function renderLogin() {
+  return `
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-logo"><span class="logo-advo">Advo</span><span class="logo-hq">HQ</span></div>
+      <div class="login-sub">Secure member access · Case &amp; Brief Management</div>
+
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="l-user" placeholder="" autocomplete="username">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="l-pass" placeholder="" autocomplete="current-password">
+      </div>
+
+      <button class="btn btn-primary login-btn-full" id="login-btn">
+        <i class="fas fa-arrow-right-to-bracket"></i> Sign Up
+      </button>
+
+      <div id="login-err" class="error-msg"></div>
+
+      <div class="or-divider">or</div>
+
+      <a href="login2.html" style="text-decoration:none; display:block;">
+        <button class="btn btn-outline login-btn-full" style="font-size:0.9rem;">
+          Login
+        </button>
+      </a>
+
+      <div class="login-hint">
+        <a href="index.html" style="color:var(--ink-4); text-decoration:none; font-size:0.75rem; display:inline-flex; align-items:center; gap:0.3rem; transition:color 0.15s;"
+           onmouseover="this.style.color='var(--ink)'" onmouseout="this.style.color='var(--ink-4)'">
+          ← Back to home
+        </a>
+      </div>
+
+    </div>
+  </div>`;
+}
+
+function bindLogin() {
+  const go = () => {
+    const u = document.getElementById('l-user').value.trim();
+    const p = document.getElementById('l-pass').value.trim();
+    const m = MEMBERS.find(x => x.username === u && x.password === p);
+    if (m) {
+      window.location.href = 'advohq-home.html';
+    } else {
+      document.getElementById('login-err').textContent = 'Invalid credentials. Please try again.';
+    }
+  };
+  document.getElementById('login-btn').onclick = go;
+  document.getElementById('l-pass').onkeydown = e => { if (e.key === 'Enter') go(); };
+}
+
+// ─────────────────────────────────────────
+//  APP VIEW
+// ─────────────────────────────────────────
+function renderApp() {
+  const upcoming = getUpcomingDates();
+  const filtered = cases.filter(c =>
+    !searchQuery || c.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const notifBanner = upcoming.length ? `
+    <div class="notif-banner">
+      <i class="fas fa-bell"></i>
+      <div class="notif-banner-list">
+        <strong style="display:block; margin-bottom:0.25rem;">Upcoming Dates</strong>
+        ${upcoming.map(u => `<div class="notif-banner-item">
+          ${u.diff === 0 ? '🔴 Today' : u.diff === 1 ? '🟡 Tomorrow' : `🟢 In ${u.diff} days`}
+          &nbsp;·&nbsp; <strong>${esc(u.caseTitle)}</strong> — ${esc(u.label)} (${formatDate(u.dateISO)})
+        </div>`).join('')}
+      </div>
+    </div>` : '';
+
+  const casesHtml = filtered.length ? filtered.map(renderCaseCard).join('') :
+    `<div class="empty-state">
+      <i class="fas fa-folder-open"></i>
+      <p>${searchQuery ? 'No cases match your search.' : 'No cases yet. Create your first case.'}</p>
+    </div>`;
+
+  return `
+  <div class="navbar">
+    <div class="navbar-inner">
+      <div class="logo"><a href="index.html" style="text-decoration:none; display:flex;"><span class="logo-advo">Advo</span><span class="logo-hq">HQ</span></a></div>
+      <div class="nav-right">
+        <span class="nav-user"><i class="far fa-user-circle"></i> ${esc(currentUser.fullName)}</span>
+        <button class="btn-ghost" id="logout-btn"><i class="fas fa-arrow-right-from-bracket"></i> Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-wrap dashboard-wrap">
+    ${notifBanner}
+
+    <div class="dash-header">
+      <div>
+        <div class="dash-title">My Cases</div>
+        <div class="dash-meta">${cases.length} case${cases.length !== 1 ? 's' : ''} · ${currentUser.fullName}</div>
+      </div>
+      <div style="display:flex; gap:0.6rem; align-items:center; flex-wrap:wrap;">
+        <div class="search-wrap">
+          <i class="fas fa-magnifying-glass"></i>
+          <input class="search-input" id="search-input" placeholder="Search cases…" value="${esc(searchQuery)}">
+        </div>
+        <button class="btn btn-primary" id="new-case-btn">
+          <i class="fas fa-plus"></i> New Case
+        </button>
+      </div>
+    </div>
+
+    <div class="cases-grid" id="cases-grid">
+      ${casesHtml}
+    </div>
+  </div>`;
+}
+
+function renderCaseCard(c) {
+  const upcoming = (c.importantDates || []).some(d => dateDiff(d.dateISO) >= 0 && dateDiff(d.dateISO) <= 3);
+  const fileChips = (c.files || []).map((f, i) => `
+    <div class="file-chip">
+      <i class="fas fa-file-alt" style="font-size:0.65rem;"></i>
+      ${esc(f)}
+      <span class="delete-chip" data-action="del-file" data-case="${c.id}" data-idx="${i}">✕</span>
+    </div>`).join('');
+
+  const datePills = (c.importantDates || []).map((d, i) => {
+    const diff = dateDiff(d.dateISO);
+    const cls = diff === 0 ? 'today' : diff >= 0 && diff <= 3 ? 'upcoming' : '';
+    const label = diff === 0 ? 'Today' : diff < 0 ? `${Math.abs(diff)}d ago` : `In ${diff}d`;
+    return `<div class="date-pill ${cls}">
+      <i class="far fa-calendar-alt" style="font-size:0.65rem;"></i>
+      <span>${esc(d.label)} · ${label}</span>
+      <span class="delete-chip" data-action="del-date" data-case="${c.id}" data-idx="${i}" style="color:${cls ? 'rgba(255,255,255,0.6)' : ''}">✕</span>
+    </div>`;
+  }).join('');
+
+  const pointsPreview = c.points
+    ? c.points.substring(0, 160) + (c.points.length > 160 ? '…' : '')
+    : 'No points yet.';
+
+  return `
+  <div class="case-card" data-case-id="${c.id}">
+    <div class="case-card-header">
+      <div class="case-card-top">
+        <div class="case-title-text">${esc(c.title)}</div>
+        <div style="display:flex; align-items:center; gap:0.5rem; flex-shrink:0;">
+          ${upcoming ? `<span class="notify-dot"></span>` : ''}
+          <button class="case-delete-btn" data-action="del-case" data-case="${c.id}" title="Delete case"><i class="fas fa-trash-can"></i></button>
+        </div>
+      </div>
+      <div class="case-date-badge"><i class="far fa-clock"></i> ${esc(c.createdDate)}</div>
+    </div>
+
+    <div class="case-card-body">
+
+      <!-- POINTS -->
+      <div class="points-block">
+        <div class="block-label"><i class="fas fa-list-ul"></i> In-Depth Points</div>
+        <div class="points-preview">${esc(pointsPreview)}</div>
+        <div class="points-actions">
+          <button class="btn btn-outline btn-sm" data-action="edit-points" data-case="${c.id}">
+            <i class="fas fa-pen"></i> Edit / Summarise
+          </button>
+        </div>
+      </div>
+
+      <!-- FILES -->
+      <div class="files-block">
+        <div class="block-label"><i class="fas fa-paperclip"></i> Files &amp; References</div>
+        <div class="file-chips">${fileChips || '<span style="font-size:0.75rem;color:var(--ink-4);">No files attached.</span>'}</div>
+        <div class="add-row">
+          <input type="text" placeholder="Add file name or reference…" id="new-file-${c.id}">
+          <button class="btn btn-outline btn-sm" data-action="add-file" data-case="${c.id}"><i class="fas fa-plus"></i></button>
+        </div>
+      </div>
+
+      <!-- DATES -->
+      <div class="dates-block">
+        <div class="block-label"><i class="far fa-calendar-check"></i> Important Dates</div>
+        <div class="date-pills">${datePills || '<span style="font-size:0.75rem;color:var(--ink-4);">No dates marked.</span>'}</div>
+        <div class="add-row">
+          <input type="date" id="new-date-${c.id}" style="max-width:145px;">
+          <input type="text" placeholder="Event label…" id="new-label-${c.id}">
+          <button class="btn btn-outline btn-sm" data-action="add-date" data-case="${c.id}"><i class="fas fa-flag"></i></button>
+        </div>
+      </div>
+
+    </div>
+  </div>`;
+}
+
+// ─────────────────────────────────────────
+//  BIND APP EVENTS
+// ─────────────────────────────────────────
+function bindApp() {
+  // Logout
+  document.getElementById('logout-btn').onclick = () => {
+    currentUser = null; cases = []; searchQuery = '';
+    render();
+  };
+
+  // Search
+  document.getElementById('search-input').oninput = e => {
+    searchQuery = e.target.value;
+    refreshGrid();
+  };
+
+  // New case
+  document.getElementById('new-case-btn').onclick = () => {
+    const title = prompt('Enter case title:');
+    if (title && title.trim()) {
+      cases.unshift({
+        id: Date.now(),
+        title: title.trim(),
+        createdDate: new Date().toLocaleDateString('en-IN'),
+        files: [],
+        points: '',
+        importantDates: []
+      });
+      saveData();
+      refreshGrid();
+      showToast('Case created successfully.');
+    }
+  };
+
+  // Delegated events on the grid
+  document.getElementById('cases-grid').addEventListener('click', handleGridClick);
+
+  // Points modal events
+  document.getElementById('close-points-modal').onclick = closePointsModal;
+  document.getElementById('cancel-points-btn').onclick = closePointsModal;
+  document.getElementById('save-points-btn').onclick = savePoints;
+  document.getElementById('ai-summarise-btn').onclick = aiSummarise;
+
+  document.getElementById('points-modal').onclick = e => {
+    if (e.target === document.getElementById('points-modal')) closePointsModal();
+  };
+}
+
+function handleGridClick(e) {
+  const btn = e.target.closest('[data-action]');
+  if (!btn) return;
+  const action = btn.dataset.action;
+  const caseId = parseInt(btn.dataset.case);
+  const c = cases.find(x => x.id === caseId);
+
+  if (action === 'edit-points' && c) {
+    activePointsCaseId = caseId;
+    document.getElementById('points-editor').value = c.points || '';
+    document.getElementById('ai-prompt-input').value = '';
+    document.getElementById('points-modal').classList.add('open');
+    setTimeout(() => document.getElementById('points-editor').focus(), 100);
+    return;
+  }
+
+  if (action === 'add-file' && c) {
+    const input = document.getElementById(`new-file-${caseId}`);
+    const val = input.value.trim();
+    if (!val) return showToast('Enter a file name or reference.', 'fa-triangle-exclamation');
+    c.files.push(val);
+    input.value = '';
+    saveData();
+    refreshGrid();
+    showToast(`File "${val}" added.`);
+    return;
+  }
+
+  if (action === 'del-file' && c) {
+    const idx = parseInt(btn.dataset.idx);
+    c.files.splice(idx, 1);
+    saveData();
+    refreshGrid();
+    return;
+  }
+
+  if (action === 'add-date' && c) {
+    const dateVal = document.getElementById(`new-date-${caseId}`).value;
+    const labelVal = document.getElementById(`new-label-${caseId}`).value.trim();
+    if (!dateVal || !labelVal) return showToast('Select a date and enter a label.', 'fa-triangle-exclamation');
+    c.importantDates.push({ id: Date.now(), dateISO: dateVal, label: labelVal, notified: false });
+    document.getElementById(`new-date-${caseId}`).value = '';
+    document.getElementById(`new-label-${caseId}`).value = '';
+    saveData();
+    refreshGrid();
+    checkNotifications();
+    showToast(`Date marked: ${labelVal}`);
+    return;
+  }
+
+  if (action === 'del-date' && c) {
+    const idx = parseInt(btn.dataset.idx);
+    c.importantDates.splice(idx, 1);
+    saveData();
+    refreshGrid();
+    return;
+  }
+
+  if (action === 'del-case') {
+    const idx = cases.findIndex(x => x.id === caseId);
+    if (idx > -1 && confirm(`Delete case "${cases[idx].title}"? This cannot be undone.`)) {
+      cases.splice(idx, 1);
+      saveData();
+      refreshGrid();
+      showToast('Case deleted.');
+    }
+    return;
+  }
+}
+
+function refreshGrid() {
+  const filtered = cases.filter(c =>
+    !searchQuery || c.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+  const grid = document.getElementById('cases-grid');
+  if (!grid) return;
+
+  if (filtered.length) {
+    grid.innerHTML = filtered.map(renderCaseCard).join('');
+  } else {
+    grid.innerHTML = `<div class="empty-state">
+      <i class="fas fa-folder-open"></i>
+      <p>${searchQuery ? 'No cases match your search.' : 'No cases yet. Create your first case.'}</p>
+    </div>`;
+  }
+
+  // Rebind delegated (already bound via grid event listener — no need to rebind)
+}
+
+// ─────────────────────────────────────────
+//  POINTS MODAL
+// ─────────────────────────────────────────
+function closePointsModal() {
+  document.getElementById('points-modal').classList.remove('open');
+  activePointsCaseId = null;
+}
+
+function savePoints() {
+  if (activePointsCaseId === null) return;
+  const c = cases.find(x => x.id === activePointsCaseId);
+  if (c) {
+    c.points = document.getElementById('points-editor').value;
+    saveData();
+    refreshGrid();
+    showToast('Points saved.');
+  }
+  closePointsModal();
+}
+
+// ─────────────────────────────────────────
+//  AI SUMMARISE (Claude API)
+// ─────────────────────────────────────────
+async function aiSummarise() {
+  const prompt = document.getElementById('ai-prompt-input').value.trim();
+  const currentText = document.getElementById('points-editor').value.trim();
+  const btn = document.getElementById('ai-summarise-btn');
+
+  if (!prompt && !currentText) {
+    return showToast('Write some points first, then ask AI.', 'fa-triangle-exclamation');
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+  const instruction = prompt
+    ? `The user has the following case points:\n\n${currentText}\n\nUser instruction: ${prompt}\n\nRespond with the updated or summarised points only, as clean bullet points.`
+    : `Summarise and expand these case points into well-structured, detailed in-depth legal points:\n\n${currentText}\n\nReturn as clean bullet points starting with •`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: instruction }]
+      })
+    });
+    const data = await res.json();
+    const text = (data.content || []).map(b => b.text || '').join('');
+    if (text) {
+      document.getElementById('points-editor').value = text;
+      document.getElementById('ai-prompt-input').value = '';
+      showToast('AI points generated.');
+    } else {
+      showToast('AI returned no content.', 'fa-triangle-exclamation');
+    }
+  } catch (err) {
+    showToast('AI request failed. Check connection.', 'fa-circle-xmark');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Run';
+  }
+}
+
+// ─────────────────────────────────────────
+//  NOTIFICATIONS
+// ─────────────────────────────────────────
+function checkNotifications() {
+  const upcoming = getUpcomingDates();
+  if (!upcoming.length) return;
+  // Already shown in banner, no double toast needed on first load
+  // But on date-add we show a specific toast
+}
+
+// ─────────────────────────────────────────
+//  INIT
+// ─────────────────────────────────────────
+render();
+
+// Auto-refresh notification check every minute
+setInterval(() => {
+  if (currentUser) checkNotifications();
+}, 60000);
+</script>
+</body>
+</html>

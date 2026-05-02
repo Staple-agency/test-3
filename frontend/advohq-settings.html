@@ -1,0 +1,1326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AdvoHQ — Settings</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --navy:    #1e3a5f;
+      --navy-2:  #2a4a72;
+      --navy-3:  #3a5f8a;
+      --cream:   #e8eaed;
+      --cream-2: #dde0e5;
+      --cream-3: #d0d4db;
+      --gold:    #c9a84c;
+      --gold-2:  #dbbe72;
+      --muted:   #6b7a8d;
+      --white:   #ffffff;
+      --ink:     #2d3748;
+      --danger:  #c0392b;
+      --danger-bg: #fdf0ef;
+      --success: #27ae60;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+    }
+
+    /* ── LAYOUT ── */
+    .app { display: flex; min-height: 100vh; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 52px;
+      background: var(--navy);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 14px 0;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 50;
+      border-right: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .sidebar-top { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
+    .sidebar-bottom { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+
+    .s-btn {
+      width: 36px; height: 36px;
+      border-radius: 8px; border: none;
+      background: transparent;
+      color: rgba(245,240,232,0.5);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: background 0.18s, color 0.18s;
+      position: relative;
+      text-decoration: none;
+    }
+    .s-btn:hover { background: rgba(245,240,232,0.1); color: rgba(245,240,232,0.9); }
+    .s-btn.active { background: rgba(184,146,42,0.18); color: var(--gold-2); }
+    .s-btn svg { width: 18px; height: 18px; stroke-width: 1.7; }
+
+    .s-divider { width: 24px; height: 1px; background: rgba(245,240,232,0.1); margin: 6px 0; }
+
+    .user-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--gold); color: var(--cream);
+      font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.85rem;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      border: 2px solid rgba(245,240,232,0.15);
+      margin-top: 8px;
+    }
+    .user-avatar:hover { transform: scale(1.06); box-shadow: 0 0 0 3px rgba(212,170,82,0.3); }
+
+    /* Tooltip */
+    .s-btn[data-tip] { position: relative; }
+    .s-btn[data-tip]::after {
+      content: attr(data-tip);
+      position: absolute; left: calc(100% + 10px); top: 50%; transform: translateY(-50%);
+      background: var(--ink); color: var(--cream);
+      font-size: 0.72rem; font-weight: 500; padding: 4px 10px; border-radius: 6px;
+      white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 0.15s; z-index: 99;
+    }
+    .s-btn[data-tip]:hover::after { opacity: 1; }
+
+    /* ── MAIN ── */
+    .main {
+      margin-left: 52px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      position: sticky; top: 0; z-index: 40;
+      background: rgba(245,240,232,0.92);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--cream-2);
+      padding: 0 32px;
+      height: 56px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+
+    .topbar-left { display: flex; align-items: center; gap: 12px; }
+
+    .back-btn {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.82rem; font-weight: 500; color: var(--muted);
+      background: none; border: none; cursor: pointer; padding: 6px 8px;
+      border-radius: 8px; transition: background 0.15s, color 0.15s;
+      text-decoration: none;
+    }
+    .back-btn:hover { background: var(--cream-2); color: var(--navy); }
+    .back-btn svg { width: 15px; height: 15px; }
+
+    .topbar-title {
+      font-size: 0.95rem; font-weight: 600; color: var(--ink);
+    }
+
+    /* ── SETTINGS BODY ── */
+    .settings-body {
+      display: flex;
+      flex: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 32px 24px;
+      gap: 32px;
+    }
+
+    /* ── LEFT NAV ── */
+    .settings-nav {
+      width: 190px;
+      flex-shrink: 0;
+    }
+
+    .nav-section-label {
+      font-size: 0.67rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--muted);
+      padding: 0 10px;
+      margin-bottom: 6px;
+      margin-top: 18px;
+    }
+    .nav-section-label:first-child { margin-top: 0; }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 9px;
+      padding: 8px 10px; border-radius: 8px;
+      font-size: 0.85rem; font-weight: 500; color: var(--navy-2);
+      cursor: pointer; transition: background 0.14s, color 0.14s;
+      border: none; background: none; width: 100%; text-align: left;
+    }
+    .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.7; }
+    .nav-item:hover { background: var(--cream-2); color: var(--navy); }
+    .nav-item.active { background: rgba(184,146,42,0.13); color: var(--navy); font-weight: 600; }
+    .nav-item.active svg { opacity: 1; stroke: var(--gold); }
+
+    /* ── CONTENT ── */
+    .settings-content { flex: 1; min-width: 0; }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    .section-heading {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem; font-weight: 700; color: var(--navy);
+      margin-bottom: 6px;
+    }
+    .section-sub {
+      font-size: 0.85rem; color: var(--muted); margin-bottom: 28px; line-height: 1.5;
+    }
+
+    /* ── SETTING CARD ── */
+    .card {
+      background: var(--white);
+      border: 1px solid var(--cream-2);
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    .card-header {
+      padding: 18px 20px 14px;
+      border-bottom: 1px solid var(--cream-2);
+    }
+    .card-header:last-child { border-bottom: none; }
+
+    .card-title {
+      font-size: 0.88rem; font-weight: 600; color: var(--ink); margin-bottom: 3px;
+    }
+    .card-desc {
+      font-size: 0.78rem; color: var(--muted); line-height: 1.5;
+    }
+
+    .row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--cream-2);
+      gap: 16px;
+    }
+    .row:last-child { border-bottom: none; }
+
+    .row-left { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+    .row-label { font-size: 0.87rem; font-weight: 500; color: var(--ink); }
+    .row-desc { font-size: 0.77rem; color: var(--muted); line-height: 1.4; }
+    .row-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+    /* ── TOGGLE ── */
+    .toggle {
+      width: 42px; height: 24px;
+      background: var(--cream-3);
+      border-radius: 12px;
+      position: relative; cursor: pointer;
+      transition: background 0.2s;
+      flex-shrink: 0;
+      border: none;
+      outline: none;
+    }
+    .toggle.on { background: var(--navy); }
+    .toggle::after {
+      content: '';
+      position: absolute;
+      top: 3px; left: 3px;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: var(--white);
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+    }
+    .toggle.on::after { transform: translateX(18px); }
+
+    /* ── SELECT ── */
+    .select-input {
+      appearance: none;
+      background: var(--cream);
+      border: 1.5px solid var(--cream-3);
+      border-radius: 8px;
+      padding: 7px 32px 7px 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem; font-weight: 500;
+      color: var(--ink); cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237a8fa3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      transition: border-color 0.15s;
+    }
+    .select-input:focus { outline: none; border-color: var(--gold); }
+
+    /* ── TEXT INPUT ── */
+    .text-input {
+      background: var(--cream);
+      border: 1.5px solid var(--cream-3);
+      border-radius: 8px;
+      padding: 7px 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem; color: var(--ink);
+      transition: border-color 0.15s;
+      width: 200px;
+    }
+    .text-input:focus { outline: none; border-color: var(--gold); }
+
+    /* ── BUTTON ── */
+    .btn {
+      padding: 7px 16px;
+      border-radius: 8px; border: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem; font-weight: 600;
+      cursor: pointer; transition: background 0.15s, transform 0.1s;
+    }
+    .btn-primary { background: var(--navy); color: var(--cream); }
+    .btn-primary:hover { background: var(--navy-2); }
+    .btn-outline { background: transparent; border: 1.5px solid var(--cream-3); color: var(--navy-2); }
+    .btn-outline:hover { background: var(--cream); border-color: var(--cream-2); }
+    .btn-danger { background: var(--danger-bg); color: var(--danger); }
+    .btn-danger:hover { background: #f9e0de; }
+    .btn-gold { background: var(--gold); color: var(--white); }
+    .btn-gold:hover { background: var(--gold-2); }
+
+    /* ── AVATAR SECTION ── */
+    .avatar-row {
+      display: flex; align-items: center; gap: 16px;
+      padding: 20px;
+    }
+    .avatar-big {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: var(--gold); color: var(--white);
+      font-size: 1.5rem; font-weight: 600;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; position: relative;
+    }
+    .avatar-info { flex: 1; }
+    .avatar-name { font-size: 1rem; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
+    .avatar-email { font-size: 0.78rem; color: var(--muted); }
+    .avatar-actions { display: flex; gap: 8px; margin-top: 10px; }
+
+    /* ── PLAN BADGE ── */
+    .plan-badge-inline {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--navy);
+      color: var(--cream);
+      font-size: 0.7rem; font-weight: 600;
+      padding: 3px 10px; border-radius: 20px;
+      letter-spacing: 0.4px;
+    }
+    .plan-badge-inline.gold { background: var(--gold); }
+
+    /* ── APPEARANCE THEME ── */
+    .theme-options {
+      display: flex; gap: 10px; flex-wrap: wrap;
+      padding: 16px 20px;
+    }
+    .theme-card {
+      border: 2px solid var(--cream-3);
+      border-radius: 10px; padding: 12px 16px;
+      cursor: pointer; transition: border-color 0.15s, background 0.15s;
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      min-width: 80px;
+    }
+    .theme-card:hover { border-color: var(--gold-2); }
+    .theme-card.selected { border-color: var(--gold); background: rgba(184,146,42,0.06); }
+    .theme-preview {
+      width: 44px; height: 28px; border-radius: 6px; border: 1px solid var(--cream-2);
+    }
+    .theme-label { font-size: 0.75rem; font-weight: 500; color: var(--navy-2); }
+
+    /* ── FONT SIZE SLIDER ── */
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 140px; height: 4px;
+      background: var(--cream-3);
+      border-radius: 2px; outline: none; cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: var(--navy);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    }
+
+    /* ── DANGER ZONE ── */
+    .danger-card {
+      background: var(--danger-bg);
+      border: 1px solid rgba(192,57,43,0.18);
+      border-radius: 14px;
+      padding: 20px;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    }
+    .danger-title { font-size: 0.88rem; font-weight: 600; color: var(--danger); margin-bottom: 3px; }
+    .danger-desc { font-size: 0.78rem; color: #a93226; line-height: 1.4; }
+
+    /* ── TAG / CHIP ── */
+    .chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 10px; border-radius: 20px;
+      font-size: 0.73rem; font-weight: 500;
+      background: var(--cream-2); color: var(--navy-2);
+    }
+    .chip.active-chip { background: rgba(39,174,96,0.12); color: #27ae60; }
+    .chip.warn-chip { background: rgba(184,146,42,0.12); color: var(--gold); }
+
+    /* ── SHORTCUT ROW ── */
+    .shortcut-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--cream-2);
+      font-size: 0.83rem;
+    }
+    .shortcut-row:last-child { border-bottom: none; }
+    .shortcut-label { color: var(--ink); font-weight: 500; }
+    .shortcut-keys { display: flex; gap: 4px; }
+    .key {
+      background: var(--cream-2);
+      border: 1px solid var(--cream-3);
+      border-radius: 5px;
+      padding: 2px 8px;
+      font-size: 0.72rem; font-weight: 600;
+      color: var(--navy-2);
+      font-family: monospace;
+    }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(60px);
+      background: var(--navy); color: var(--cream);
+      padding: 10px 22px; border-radius: 30px;
+      font-size: 0.8rem; font-weight: 500;
+      box-shadow: 0 4px 20px rgba(30,45,74,0.2);
+      transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+      z-index: 999; pointer-events: none;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 700px) {
+      .sidebar {
+        position: fixed; bottom: 0; left: 0; right: 0;
+        width: 100%; height: 56px;
+        flex-direction: row; padding: 0 8px; z-index: 100;
+        border-right: none; border-top: 1px solid rgba(255,255,255,0.08);
+        top: auto;
+      }
+      .sidebar-top { flex-direction: row; flex: 1; justify-content: space-around; align-items: center; gap: 0; }
+      .sidebar-bottom { flex-direction: row; align-items: center; }
+      .s-divider { display: none; }
+      .s-btn[data-tip]::after { display: none; }
+      .user-avatar { margin-top: 0; margin-left: 6px; }
+      .main { margin-left: 0; padding-bottom: 56px; }
+      .topbar { padding: 0 16px; }
+      .settings-body { flex-direction: column; padding: 20px 16px; gap: 20px; }
+      .settings-nav { width: 100%; }
+      .nav-section-label { display: none; }
+      .settings-nav-inner {
+        display: flex; flex-wrap: wrap; gap: 6px;
+      }
+      .nav-item { width: auto; padding: 7px 12px; border-radius: 20px; }
+      .nav-item svg { display: none; }
+      .text-input { width: 140px; }
+      .toast { bottom: 68px; }
+    }
+    /* ── NOTIFICATION BELL ── */
+    .notif-btn {
+      position: relative;
+      width: 36px; height: 36px;
+      border-radius: 9px; border: none;
+      background: transparent;
+      color: var(--navy-2);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      flex-shrink: 0;
+    }
+    .notif-btn:hover { background: var(--cream-2); color: var(--navy); }
+    .notif-btn svg { width: 18px; height: 18px; stroke-width: 1.7; }
+    .notif-badge {
+      display: none;
+      position: absolute; top: 4px; right: 4px;
+      min-width: 16px; height: 16px;
+      background: var(--danger); color: var(--white);
+      border-radius: 8px; border: 2px solid var(--cream);
+      font-size: 0.6rem; font-weight: 700;
+      align-items: center; justify-content: center;
+      line-height: 1; padding: 0 3px;
+    }
+    .notif-badge.show { display: flex; }
+
+    /* Notification panel */
+    .notif-panel {
+      position: fixed; top: 62px; right: 16px;
+      width: 340px;
+      background: var(--white);
+      border: 1px solid var(--cream-2);
+      border-radius: 16px;
+      box-shadow: 0 12px 48px rgba(30,45,74,0.16);
+      z-index: 500;
+      opacity: 0; pointer-events: none;
+      transform: translateY(-8px) scale(0.97);
+      transform-origin: top right;
+      transition: opacity 0.18s, transform 0.18s;
+      overflow: hidden;
+    }
+    .notif-panel.open { opacity: 1; pointer-events: all; transform: translateY(0) scale(1); }
+
+    .notif-panel-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 18px 12px;
+      border-bottom: 1px solid var(--cream-2);
+    }
+    .notif-panel-title {
+      font-size: 0.9rem; font-weight: 700; color: var(--ink);
+      font-family: 'Playfair Display', serif;
+    }
+    .notif-mark-read {
+      font-size: 0.75rem; font-weight: 500; color: var(--gold);
+      background: none; border: none; cursor: pointer;
+      transition: color 0.15s; padding: 0;
+    }
+    .notif-mark-read:hover { color: var(--navy); }
+
+    .notif-list { max-height: 380px; overflow-y: auto; }
+    .notif-list::-webkit-scrollbar { width: 4px; }
+    .notif-list::-webkit-scrollbar-thumb { background: var(--cream-3); border-radius: 2px; }
+
+    .notif-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--cream-2);
+      cursor: pointer;
+      transition: background 0.13s;
+      position: relative;
+    }
+    .notif-item:last-child { border-bottom: none; }
+    .notif-item:hover { background: var(--cream); }
+    .notif-item.unread { background: rgba(184,146,42,0.04); }
+    .notif-item.unread:hover { background: rgba(184,146,42,0.08); }
+
+    .notif-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--gold); flex-shrink: 0; margin-top: 6px;
+      transition: opacity 0.2s;
+    }
+    .notif-item:not(.unread) .notif-dot { opacity: 0; }
+
+    .notif-icon {
+      width: 34px; height: 34px; border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .notif-icon.hearing { background: rgba(41,128,185,0.12); color: #2980b9; }
+    .notif-icon.deadline { background: rgba(192,57,43,0.1); color: var(--danger); }
+    .notif-icon.upload { background: rgba(39,174,96,0.1); color: var(--success); }
+    .notif-icon.reminder { background: rgba(184,146,42,0.13); color: var(--gold); }
+    .notif-icon svg { width: 16px; height: 16px; stroke-width: 1.8; }
+
+    .notif-body { flex: 1; min-width: 0; }
+    .notif-body-title {
+      font-size: 0.83rem; font-weight: 600; color: var(--ink);
+      margin-bottom: 2px; line-height: 1.3;
+    }
+    .notif-body-text {
+      font-size: 0.76rem; color: var(--muted); line-height: 1.45;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .notif-time {
+      font-size: 0.68rem; color: var(--muted); flex-shrink: 0; padding-top: 3px;
+    }
+
+    .notif-empty {
+      padding: 36px 18px; text-align: center;
+      font-size: 0.83rem; color: var(--muted); line-height: 1.5;
+    }
+    .notif-empty svg { width: 32px; height: 32px; stroke: var(--cream-3); margin-bottom: 10px; }
+
+  </style>
+  <script src="api-client.js"></script>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+    <div class="sidebar-top">
+      <a href="advohq-home.html" class="s-btn" data-tip="Home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9.5z"/><polyline points="9 21 9 12 15 12 15 21"/></svg>
+      </a>
+      <div class="s-divider"></div>
+      <a href="advohq-file.html" class="s-btn" data-tip="Editor">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      </a>
+      <a href="advohq-schedule.html" class="s-btn" data-tip="Schedule">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      </a>
+      <div class="s-divider"></div>
+      <button class="s-btn active" data-tip="Settings" onclick="toast('You are here')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
+    </div>
+    <div class="sidebar-bottom">
+      <div class="user-avatar" id="sideAvatar"></div>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <div class="main">
+
+    <!-- Top Bar -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <a href="advohq-home.html" class="back-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+          Back
+        </a>
+        <span style="color:var(--cream-3);">|</span>
+        <span class="topbar-title">Settings</span>
+      </div>
+      <div class="topbar-right" style="display:flex;align-items:center;gap:8px;">
+        <button class="notif-btn" id="notifBtn" onclick="toggleNotifPanel(event)" title="Notifications">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="notif-badge" id="notifBadge"></span>
+        </button>
+        <span style="font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:var(--navy);">Advo<em style="color:var(--gold);font-style:normal;">HQ</em></span>
+      </div>
+    </div>
+
+    <!-- Settings Body -->
+    <div class="settings-body">
+
+      <!-- LEFT NAV -->
+      <nav class="settings-nav">
+        <div class="settings-nav-inner">
+          <div class="nav-section-label">Account</div>
+          <button class="nav-item active" onclick="switchTab('profile', this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Profile
+          </button>
+
+          <div class="nav-section-label">Preferences</div>
+          <button class="nav-item" onclick="switchTab('notifications', this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            Notifications
+          </button>
+
+
+          <div class="nav-section-label">Data & Privacy</div>
+          <button class="nav-item" onclick="switchTab('privacy', this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Privacy & Data
+          </button>
+          <button class="nav-item" onclick="switchTab('memory', this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+            Memory
+          </button>
+        </div>
+      </nav>
+
+      <!-- ── CONTENT ── -->
+      <div class="settings-content">
+
+        <!-- ═══ PROFILE ═══ -->
+        <div class="section active" id="sec-profile">
+          <h2 class="section-heading">Profile</h2>
+          <p class="section-sub">Manage your personal information and how you appear in AdvoHQ.</p>
+
+          <div class="card">
+            <div class="avatar-row">
+              <div class="avatar-big" id="avatarBig"></div>
+              <div class="avatar-info">
+                <div class="avatar-name" id="avatarName"></div>
+                <div class="avatar-email" id="avatarEmail"></div>
+                <div class="avatar-actions">
+                  <button class="btn btn-outline" onclick="toast('Avatar upload coming soon')">Change photo</button>
+                  <button class="btn btn-outline" onclick="toast('Photo removed')">Remove</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="row">
+              <div class="row-left">
+                <div class="row-label">Display name</div>
+                <div class="row-desc">How your name appears across AdvoHQ</div>
+              </div>
+              <div class="row-right">
+                <input class="text-input" type="text" value="" id="displayName" placeholder="Your name"/>
+                <button class="btn btn-primary" onclick="saveName()">Save</button>
+              </div>
+            </div>
+            <div class="row">
+              <div class="row-left">
+                <div class="row-label">Email address</div>
+                <div class="row-desc" id="emailDesc">—</div>
+              </div>
+              <div class="row-right">
+                <span class="chip active-chip">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  Verified
+                </span>
+                <button class="btn btn-outline" onclick="toast('Email change email sent')">Change</button>
+              </div>
+            </div>
+            <div class="row">
+              <div class="row-left">
+                <div class="row-label">Username</div>
+                <div class="row-desc">Your unique handle in AdvoHQ</div>
+              </div>
+              <div class="row-right">
+                <input class="text-input" type="text" value="" id="usernameInput" style="width:150px;" placeholder="username"/>
+                <button class="btn btn-primary" onclick="saveUsername()">Save</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="row">
+              <div class="row-left">
+                <div class="row-label">Delete account</div>
+                <div class="row-desc">Permanently remove your account and all associated data</div>
+              </div>
+              <div class="row-right">
+                <button class="btn btn-danger" onclick="openModal('delete-account')">Delete account</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ NOTIFICATIONS ═══ -->
+        <div class="section" id="sec-notifications">
+          <h2 class="section-heading">Notifications</h2>
+          <p class="section-sub">Control when and how AdvoHQ contacts you.</p>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Email notifications</div>
+              <div class="card-desc">Sent to your email address</div>
+            </div>
+            <div class="row">
+              <div class="row-left">
+                <div class="row-label">Usage alerts</div>
+                <div class="row-desc">When you're approaching your monthly message limit</div>
+              </div>
+              <div class="row-right">
+                <button class="toggle on" data-key="notif-usage-alerts" onclick="toggleSwitch(this)" title="Toggle usage alerts"></button>
+              </div>
+            </div>
+            <div class="row">
+              <div class="row-left">
+                <div class="row-label">Product updates</div>
+                <div class="row-desc">New features, improvements, and release notes</div>
+              </div>
+              <div class="row-right">
+                <button class="toggle on" data-key="notif-product-updates" onclick="toggleSwitch(this)" title="Toggle product updates"></button>
+              </div>
+            </div>
+            <div class="row">
+              <div class="row-left">
+                <div class="row-label">Billing reminders</div>
+                <div class="row-desc">Upcoming renewals and payment receipts</div>
+              </div>
+              <div class="row-right">
+                <button class="toggle on" data-key="notif-billing-reminders" onclick="toggleSwitch(this)" title="Toggle billing reminders"></button>
+              </div>
+            </div>
+            <div class="row">
+              <div class="row-left">
+                <div class="row-label">Tips & tutorials</div>
+                <div class="row-desc">Get the most out of AdvoHQ</div>
+              </div>
+              <div class="row-right">
+                <button class="toggle" data-key="notif-tips" onclick="toggleSwitch(this)" title="Toggle tips"></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Push notifications</div>
+              <div class="card-desc">Browser and mobile push alerts</div>
+            </div>
+            <div class="row">
+              <div class="row-left">
+                <div class="row-label">Enable push notifications</div>
+                <div class="row-desc">Allow AdvoHQ to send alerts to this device</div>
+              </div>
+              <div class="row-right">
+                <button class="btn btn-outline" onclick="toast('Permission requested — check your browser')">Enable</button>
+                <button class="toggle" onclick="toggleSwitch(this)" title="Toggle push"></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+        <!-- ═══ PRIVACY ═══ -->
+        <div class="section" id="sec-privacy">
+          <h2 class="section-heading">Privacy & Data</h2>
+          <p class="section-sub">Control how your data is stored and used.</p>
+
+          <div class="card">
+            <div class="row">
+              <div class="row-left">
+                <div class="row-label">Conversation history</div>
+                <div class="row-desc">Save chats so you can access them later</div>
+              </div>
+              <div class="row-right">
+                <button class="toggle on" data-key="privacy-conv-history" onclick="toggleSwitch(this)" title="Toggle history"></button>
+              </div>
+            </div>
+            <div class="row">
+              <div class="row-left">
+                <div class="row-label">Use my data to improve AdvoHQ</div>
+                <div class="row-desc">Help improve response quality by sharing anonymised usage</div>
+              </div>
+              <div class="row-right">
+                <button class="toggle" data-key="privacy-data-improvement" onclick="toggleSwitch(this)" title="Toggle data improvement"></button>
+              </div>
+            </div>
+            <div class="row">
+              <div class="row-left">
+                <div class="row-label">Analytics cookies</div>
+                <div class="row-desc">Allow anonymous analytics to improve the product</div>
+              </div>
+              <div class="row-right">
+                <button class="toggle on" data-key="privacy-analytics" onclick="toggleSwitch(this)" title="Toggle analytics"></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="row">
+              <div class="row-left">
+                <div class="row-label">Export my data</div>
+                <div class="row-desc">Download a copy of all your conversations and account data</div>
+              </div>
+              <div class="row-right">
+                <button class="btn btn-outline" id="export-btn" onclick="requestExport()">Request export</button>
+              </div>
+            </div>
+            <div class="row">
+              <div class="row-left">
+                <div class="row-label">Delete all conversations</div>
+                <div class="row-desc">Permanently erase your entire chat history</div>
+              </div>
+              <div class="row-right">
+                <button class="btn btn-danger" onclick="openModal('delete-convos')">Delete all</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="danger-card">
+            <div>
+              <div class="danger-title">Danger zone</div>
+              <div class="danger-desc">Deleting your account is permanent and cannot be undone. All data will be erased.</div>
+            </div>
+            <button class="btn btn-danger" onclick="openModal('delete-account')">Delete account</button>
+          </div>
+        </div>
+
+        <!-- ═══ MEMORY ═══ -->
+        <div class="section" id="sec-memory">
+          <h2 class="section-heading">Memory</h2>
+          <p class="section-sub">AdvoHQ can remember things about you to personalise responses over time.</p>
+
+          <div class="card">
+            <div class="row">
+              <div class="row-left">
+                <div class="row-label">Enable memory</div>
+                <div class="row-desc">Remember details across conversations to give better responses</div>
+              </div>
+              <div class="row-right">
+                <button class="toggle on" data-key="memory-enabled" onclick="toggleSwitch(this)" title="Toggle memory"></button>
+              </div>
+            </div>
+            <div class="row">
+              <div class="row-left">
+                <div class="row-label">Show memory references</div>
+                <div class="row-desc">Display a note when a response uses something from memory</div>
+              </div>
+              <div class="row-right">
+                <button class="toggle on" data-key="memory-show-refs" onclick="toggleSwitch(this)" title="Toggle memory refs"></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Saved memories</div>
+              <div class="card-desc">Things AdvoHQ currently remembers about you</div>
+            </div>
+            <div class="row" style="align-items:flex-start;gap:12px;">
+              <div id="memories-list" style="flex:1;display:flex;flex-direction:column;gap:10px;padding:4px 0;">
+                <div class="memory-item" style="background:var(--cream);border-radius:8px;padding:10px 14px;font-size:0.83rem;color:var(--ink);line-height:1.5;display:flex;justify-content:space-between;align-items:center;gap:12px;">
+                  <span>Prefers concise, bullet-pointed answers</span>
+                  <button style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:0.75rem;flex-shrink:0;padding:2px 6px;border-radius:4px;transition:background 0.15s;" onmouseover="this.style.background='var(--cream-2)'" onmouseout="this.style.background='none'" onclick="removeMemory(this)">✕</button>
+                </div>
+                <div class="memory-item" style="background:var(--cream);border-radius:8px;padding:10px 14px;font-size:0.83rem;color:var(--ink);line-height:1.5;display:flex;justify-content:space-between;align-items:center;gap:12px;">
+                  <span>Works on legal case management (AdvoHQ)</span>
+                  <button style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:0.75rem;flex-shrink:0;padding:2px 6px;border-radius:4px;transition:background 0.15s;" onmouseover="this.style.background='var(--cream-2)'" onmouseout="this.style.background='none'" onclick="removeMemory(this)">✕</button>
+                </div>
+                <div class="memory-item" style="background:var(--cream);border-radius:8px;padding:10px 14px;font-size:0.83rem;color:var(--ink);line-height:1.5;display:flex;justify-content:space-between;align-items:center;gap:12px;">
+                  <span>Based in Bengaluru, India</span>
+                  <button style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:0.75rem;flex-shrink:0;padding:2px 6px;border-radius:4px;transition:background 0.15s;" onmouseover="this.style.background='var(--cream-2)'" onmouseout="this.style.background='none'" onclick="removeMemory(this)">✕</button>
+                </div>
+                <div id="memories-empty" style="display:none;padding:12px 0;text-align:center;font-size:0.82rem;color:var(--muted);">No saved memories</div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="row-left">
+                <div class="row-label">Clear all memories</div>
+                <div class="row-desc">Remove everything AdvoHQ remembers about you</div>
+              </div>
+              <div class="row-right">
+                <button class="btn btn-danger" onclick="openModal('clear-memories')">Clear all</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /settings-content -->
+    </div><!-- /settings-body -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- TOAST -->
+<div class="toast" id="toastEl"></div>
+
+<!-- MODAL OVERLAY -->
+<div id="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(26,34,48,0.45);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(4px);">
+  <div id="modal-box" style="background:var(--white);border-radius:18px;padding:28px;max-width:420px;width:calc(100% - 40px);box-shadow:0 20px 60px rgba(30,45,74,0.18);animation:modalIn 0.2s ease;">
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<script>
+
+  // ── MODAL ANIMATION ──
+  const modalStyle = document.createElement('style');
+  modalStyle.textContent = `@keyframes modalIn { from { opacity:0; transform:scale(0.95) translateY(8px); } to { opacity:1; transform:scale(1) translateY(0); } }`;
+  document.head.appendChild(modalStyle);
+
+  // ── TAB SWITCHING ──
+  function switchTab(id, btn) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('sec-' + id).classList.add('active');
+    btn.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ── TOAST ──
+  let toastTimer;
+  function toast(msg) {
+    const el = document.getElementById('toastEl');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+  }
+
+  // ── TOGGLE with localStorage ──
+  function toggleSwitch(el) {
+    el.classList.toggle('on');
+    const isOn = el.classList.contains('on');
+    toast(isOn ? 'Setting enabled' : 'Setting disabled');
+    const key = el.dataset.key;
+    if (key) localStorage.setItem('advohq_' + key, isOn ? '1' : '0');
+  }
+
+  // Restore toggles from localStorage on load
+  document.querySelectorAll('.toggle[data-key]').forEach(t => {
+    const val = localStorage.getItem('advohq_' + t.dataset.key);
+    if (val === '1') t.classList.add('on');
+    else if (val === '0') t.classList.remove('on');
+  });
+
+  // ── MODAL SYSTEM ──
+  const overlay = document.getElementById('modal-overlay');
+  const modalContent = document.getElementById('modal-content');
+
+  const MODALS = {
+    'delete-account': {
+      icon: '⚠️',
+      title: 'Delete your account?',
+      body: 'This is permanent and cannot be undone. All your cases, data, and history will be erased immediately.',
+      confirmLabel: 'Yes, delete my account',
+      confirmClass: 'btn-danger',
+      onConfirm: () => { closeModal(); toast('Please contact support to delete your account'); }
+    },
+    'delete-convos': {
+      icon: '🗑️',
+      title: 'Delete all conversations?',
+      body: 'Your entire conversation history will be permanently erased. This action cannot be undone.',
+      confirmLabel: 'Delete all conversations',
+      confirmClass: 'btn-danger',
+      onConfirm: () => { closeModal(); toast('All conversations deleted'); }
+    },
+    'signout-all': {
+      icon: '🔒',
+      title: 'Sign out of all other sessions?',
+      body: 'All devices except this one will be signed out immediately. You will remain logged in here.',
+      confirmLabel: 'Sign out all',
+      confirmClass: 'btn-danger',
+      onConfirm: () => {
+        closeModal();
+        const iphone = document.getElementById('session-iphone');
+        if (iphone) {
+          iphone.style.transition = 'opacity 0.3s, max-height 0.35s, padding 0.35s';
+          iphone.style.opacity = '0';
+          iphone.style.overflow = 'hidden';
+          iphone.style.maxHeight = iphone.offsetHeight + 'px';
+          setTimeout(() => { iphone.style.maxHeight = '0'; iphone.style.padding = '0'; }, 50);
+          setTimeout(() => iphone.remove(), 380);
+        }
+        toast('All other sessions signed out');
+      }
+    },
+    'clear-memories': {
+      icon: '🧠',
+      title: 'Clear all memories?',
+      body: 'AdvoHQ will forget everything it remembers about you. Responses may become less personalised.',
+      confirmLabel: 'Clear all memories',
+      confirmClass: 'btn-danger',
+      onConfirm: () => {
+        closeModal();
+        document.querySelectorAll('.memory-item').forEach(item => {
+          item.style.transition = 'opacity 0.25s';
+          item.style.opacity = '0';
+          setTimeout(() => item.remove(), 260);
+        });
+        setTimeout(() => {
+          const empty = document.getElementById('memories-empty');
+          if (empty) empty.style.display = 'block';
+        }, 300);
+        toast('All memories cleared');
+      }
+    },
+    'twofa': {
+      icon: '🔐',
+      title: 'Enable Two-Factor Authentication',
+      body: 'Scan this QR code with an authenticator app (Google Authenticator, Authy, etc.) then enter the 6-digit code to confirm.',
+      custom: `
+        <div style="background:var(--cream);border-radius:10px;padding:20px;display:flex;align-items:center;justify-content:center;margin:16px 0;">
+          <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="80" height="80" rx="8" fill="#e8eaed"/>
+            <rect x="10" y="10" width="24" height="24" rx="2" stroke="#1e3a5f" stroke-width="3" fill="none"/>
+            <rect x="16" y="16" width="12" height="12" rx="1" fill="#1e3a5f"/>
+            <rect x="46" y="10" width="24" height="24" rx="2" stroke="#1e3a5f" stroke-width="3" fill="none"/>
+            <rect x="52" y="16" width="12" height="12" rx="1" fill="#1e3a5f"/>
+            <rect x="10" y="46" width="24" height="24" rx="2" stroke="#1e3a5f" stroke-width="3" fill="none"/>
+            <rect x="16" y="52" width="12" height="12" rx="1" fill="#1e3a5f"/>
+            <rect x="46" y="46" width="8" height="8" rx="1" fill="#c9a84c"/>
+            <rect x="58" y="46" width="8" height="8" rx="1" fill="#c9a84c"/>
+            <rect x="46" y="58" width="8" height="8" rx="1" fill="#c9a84c"/>
+            <rect x="58" y="58" width="8" height="8" rx="1" fill="#1e3a5f"/>
+          </svg>
+        </div>
+        <input class="text-input" id="twofa-code" type="text" inputmode="numeric" maxlength="6" placeholder="000000" style="width:100%;text-align:center;letter-spacing:6px;font-size:1.1rem;font-weight:600;"/>`,
+      confirmLabel: 'Verify & Enable',
+      confirmClass: 'btn-primary',
+      onConfirm: () => {
+        const code = document.getElementById('twofa-code').value.trim();
+        if (code.length !== 6 || isNaN(code)) { toast('Enter a valid 6-digit code'); return; }
+        closeModal();
+        const chip = document.getElementById('twofa-chip');
+        const btn  = document.getElementById('twofa-btn');
+        if (chip) {
+          chip.className = 'chip active-chip';
+          chip.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Enabled';
+        }
+        if (btn) {
+          btn.textContent = 'Disable 2FA';
+          btn.className = 'btn btn-outline';
+          btn.onclick = () => {
+            if (chip) { chip.className = 'chip warn-chip'; chip.textContent = 'Not enabled'; }
+            btn.textContent = 'Enable 2FA';
+            btn.className = 'btn btn-primary';
+            btn.onclick = () => openModal('twofa');
+            localStorage.removeItem('advohq_2fa');
+            toast('Two-factor authentication disabled');
+          };
+        }
+        localStorage.setItem('advohq_2fa', '1');
+        toast('Two-factor authentication enabled');
+      }
+    }
+  };
+
+  function openModal(type) {
+    const cfg = MODALS[type];
+    if (!cfg) return;
+    modalContent.innerHTML = `
+      <div style="font-size:1.6rem;margin-bottom:12px;">${cfg.icon}</div>
+      <div style="font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:var(--navy);margin-bottom:10px;">${cfg.title}</div>
+      <div style="font-size:0.84rem;color:var(--muted);line-height:1.6;margin-bottom:${cfg.custom?'0':'24px'}">${cfg.body}</div>
+      ${cfg.custom || ''}
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:24px;">
+        <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        <button class="btn ${cfg.confirmClass}" onclick="MODALS['${type}'].onConfirm()">${cfg.confirmLabel}</button>
+      </div>`;
+    overlay.style.display = 'flex';
+  }
+
+  function closeModal() {
+    overlay.style.display = 'none';
+    modalContent.innerHTML = '';
+  }
+
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+  // ── PROFILE: SAVE NAME ──
+  function saveName() {
+    const val = document.getElementById('displayName').value.trim();
+    if (!val) { toast('Name cannot be empty'); return; }
+    const initial = val.charAt(0).toUpperCase();
+    const nameEl = document.getElementById('avatarName');
+    const bigEl  = document.getElementById('avatarBig');
+    const sideEl = document.getElementById('sideAvatar');
+    if (nameEl) nameEl.textContent = val;
+    if (bigEl)  bigEl.textContent  = initial;
+    if (sideEl) sideEl.textContent = initial;
+    localStorage.setItem('advohq_display_name', val);
+    toast('Display name saved');
+  }
+
+  function saveUsername() {
+    const val = document.getElementById('usernameInput').value.trim();
+    if (!val) { toast('Username cannot be empty'); return; }
+    if (!/^[a-z0-9_]+$/i.test(val)) { toast('Only letters, numbers and underscores allowed'); return; }
+    localStorage.setItem('advohq_username', val);
+    toast('Username saved');
+  }
+
+  // Restore display name on load
+  const savedName = localStorage.getItem('advohq_display_name');
+  if (savedName) {
+    const inp    = document.getElementById('displayName');
+    const nameEl = document.getElementById('avatarName');
+    const bigEl  = document.getElementById('avatarBig');
+    const sideEl = document.getElementById('sideAvatar');
+    if (inp)    inp.value        = savedName;
+    if (nameEl) nameEl.textContent = savedName;
+    if (bigEl)  bigEl.textContent  = savedName.charAt(0).toUpperCase();
+    if (sideEl) sideEl.textContent = savedName.charAt(0).toUpperCase();
+  }
+
+  const savedUsername = localStorage.getItem('advohq_username');
+  if (savedUsername) { const u = document.getElementById('usernameInput'); if (u) u.value = savedUsername; }
+
+  // ── SECURITY: PASSWORD ──
+  function showPasswordForm() {
+    document.getElementById('password-form').style.display = 'flex';
+    document.getElementById('change-pw-btn').style.display = 'none';
+    document.getElementById('pw-current').focus();
+  }
+
+  function hidePasswordForm() {
+    document.getElementById('password-form').style.display = 'none';
+    document.getElementById('change-pw-btn').style.display = '';
+    ['pw-current','pw-new','pw-confirm'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+  }
+
+  function savePassword() {
+    const curr = document.getElementById('pw-current').value;
+    const nw   = document.getElementById('pw-new').value;
+    const conf = document.getElementById('pw-confirm').value;
+    if (!curr) { toast('Enter your current password'); return; }
+    if (nw.length < 8) { toast('New password must be at least 8 characters'); return; }
+    if (nw !== conf) { toast('Passwords do not match'); return; }
+    hidePasswordForm();
+    const desc = document.getElementById('password-desc');
+    if (desc) desc.textContent = 'Last changed — just now';
+    toast('Password updated successfully');
+  }
+
+  // Restore 2FA state on load
+  if (localStorage.getItem('advohq_2fa') === '1') {
+    const chip = document.getElementById('twofa-chip');
+    const btn  = document.getElementById('twofa-btn');
+    if (chip) {
+      chip.className = 'chip active-chip';
+      chip.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Enabled';
+    }
+    if (btn) {
+      btn.textContent = 'Disable 2FA';
+      btn.className = 'btn btn-outline';
+      btn.onclick = () => {
+        if (chip) { chip.className = 'chip warn-chip'; chip.textContent = 'Not enabled'; }
+        btn.textContent = 'Enable 2FA';
+        btn.className = 'btn btn-primary';
+        btn.onclick = () => openModal('twofa');
+        localStorage.removeItem('advohq_2fa');
+        toast('Two-factor authentication disabled');
+      };
+    }
+  }
+
+  // ── SESSION REVOKE ──
+  function revokeSession(rowId, label) {
+    const row = document.getElementById(rowId);
+    if (!row) return;
+    row.style.transition = 'opacity 0.3s, max-height 0.35s, padding 0.35s';
+    row.style.opacity = '0';
+    row.style.overflow = 'hidden';
+    row.style.maxHeight = row.offsetHeight + 'px';
+    setTimeout(() => { row.style.maxHeight = '0'; row.style.padding = '0'; }, 50);
+    setTimeout(() => { row.remove(); toast(label + ' session revoked'); }, 380);
+  }
+
+  // ── MEMORY: REMOVE SINGLE ──
+  function removeMemory(btn) {
+    const item = btn.closest('.memory-item');
+    if (!item) return;
+    item.style.transition = 'opacity 0.25s, max-height 0.3s, margin 0.3s, padding 0.3s';
+    item.style.opacity = '0';
+    item.style.overflow = 'hidden';
+    item.style.maxHeight = item.offsetHeight + 'px';
+    setTimeout(() => { item.style.maxHeight = '0'; item.style.padding = '0'; item.style.marginBottom = '0'; }, 50);
+    setTimeout(() => {
+      item.remove();
+      toast('Memory removed');
+      if (document.querySelectorAll('.memory-item').length === 0) {
+        const empty = document.getElementById('memories-empty');
+        if (empty) empty.style.display = 'block';
+      }
+    }, 320);
+  }
+
+  // ── EXPORT DATA ──
+  function requestExport() {
+    const btn = document.getElementById('export-btn');
+    if (!btn || btn.disabled) return;
+    btn.disabled = true;
+    btn.textContent = 'Preparing…';
+    setTimeout(() => {
+      btn.textContent = '✓ Export requested';
+      btn.style.color = 'var(--success)';
+      btn.style.borderColor = 'rgba(39,174,96,0.3)';
+      toast('Export request submitted — check your email shortly');
+    }, 1200);
+  }
+
+
+  // ── NOTIFICATIONS ──
+  const NOTIF_READ_KEY = 'advohq_notif_read';
+
+  async function renderNotifPanel() {
+    const list = document.getElementById('notifList');
+    if (!list) return;
+    list.innerHTML = '<div class="notif-empty" style="padding:24px;text-align:center;color:var(--muted);font-size:0.82rem;">Loading…</div>';
+
+    try {
+      const { notifications, unread_count } = await API.getNotifications();
+      updateBadge(unread_count);
+
+      if (!notifications || notifications.length === 0) {
+        list.innerHTML = `<div class="notif-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="width:32px;height:32px;stroke:var(--cream-3);margin-bottom:10px;display:block;margin-left:auto;margin-right:auto"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>You\'re all caught up!</div>`;
+        return;
+      }
+
+      const iconMap = {
+        day_of:      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
+        reminder_1d: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+      };
+      const typeClass = { day_of: 'deadline', reminder_1d: 'hearing' };
+
+      list.innerHTML = notifications.map(n => {
+        const unread = !n.is_read;
+        const icon   = iconMap[n.type] || iconMap.reminder_1d;
+        const cls    = typeClass[n.type] || 'reminder';
+        const time   = n.type === 'day_of' ? 'Today' : 'Tomorrow';
+        return `<div class="notif-item${unread ? ' unread' : ''}" onclick="readNotif(${n.id})">
+          <div class="notif-dot"></div>
+          <div class="notif-icon ${cls}">${icon}</div>
+          <div class="notif-body">
+            <div class="notif-body-title">${n.title}</div>
+            <div class="notif-body-text">${n.body || ''}</div>
+          </div>
+          <div class="notif-time">${time}</div>
+        </div>`;
+      }).join('');
+    } catch(e) {
+      list.innerHTML = '<div class="notif-empty" style="padding:24px;text-align:center;color:var(--muted);font-size:0.82rem;">Could not load notifications.</div>';
+    }
+  }
+
+  function updateBadge(count) {
+    const badge = document.getElementById('notifBadge');
+    if (!badge) return;
+    badge.textContent = count > 9 ? '9+' : count;
+    badge.classList.toggle('show', count > 0);
+  }
+
+  async function readNotif(id) {
+    try { await API.markNotificationRead(id); } catch(e) {}
+    renderNotifPanel();
+  }
+
+  async function markAllRead() {
+    try { await API.markAllNotificationsRead(); } catch(e) {}
+    renderNotifPanel();
+  }
+
+  let notifOpen = false;
+  function toggleNotifPanel() {
+    notifOpen = !notifOpen;
+    const panel = document.getElementById('notifPanel');
+    if (notifOpen) { renderNotifPanel(); panel.classList.add('open'); }
+    else { panel.classList.remove('open'); }
+  }
+
+  // Close panel on outside click
+  document.addEventListener('click', function(e) {
+    if (!notifOpen) return;
+    const panel = document.getElementById('notifPanel');
+    if (panel && !panel.contains(e.target)) {
+      notifOpen = false; panel.classList.remove('open');
+    }
+  });
+
+  // Poll badge count every 60s
+  async function pollNotifCount() {
+    try {
+      const { unread_count } = await API.getNotificationCount();
+      updateBadge(unread_count);
+    } catch(e) {}
+  }
+
+  // Init badge + start polling
+  pollNotifCount();
+  setInterval(pollNotifCount, 60000);
+</script>
+<!-- Notification Panel -->
+<div class="notif-panel" id="notifPanel">
+  <div class="notif-panel-header">
+    <span class="notif-panel-title">Notifications</span>
+    <button class="notif-mark-read" onclick="markAllRead()">Mark all as read</button>
+  </div>
+  <div class="notif-list" id="notifList"></div>
+</div>
+
+</body>
+</html>

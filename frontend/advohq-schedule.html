@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AdvoHQ — Schedule</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --navy:      #1e3a5f;
+      --navy-2:    #2a4a72;
+      --navy-3:    #3a5f8a;
+      --cream:     #e8eaed;
+      --cream-2:   #dde0e5;
+      --cream-3:   #d0d4db;
+      --gold:      #c9a84c;
+      --gold-2:    #dbbe72;
+      --muted:     #6b7a8d;
+      --white:     #ffffff;
+      --ink:       #2d3748;
+      --danger:    #c0392b;
+      --danger-bg: #fdf0ef;
+      --success:   #27ae60;
+
+      /* hearing type colors */
+      --c-hearing:  #2563eb;
+      --c-hearing-bg: #eff6ff;
+      --c-meeting:  #7c3aed;
+      --c-meeting-bg: #f5f3ff;
+      --c-deadline: #dc2626;
+      --c-deadline-bg: #fef2f2;
+      --c-filing:   #059669;
+      --c-filing-bg: #ecfdf5;
+      --c-other:    #c9a84c;
+      --c-other-bg: #fffbeb;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); }
+
+    /* ── LAYOUT ── */
+    .app { display: flex; min-height: 100vh; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 52px; background: var(--navy);
+      display: flex; flex-direction: column; align-items: center;
+      padding: 14px 0; position: fixed; top: 0; left: 0; bottom: 0;
+      z-index: 50; border-right: 1px solid rgba(255,255,255,0.06); flex-shrink: 0;
+    }
+    .sidebar-top { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
+    .sidebar-bottom { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .s-btn {
+      width: 36px; height: 36px; border-radius: 8px; border: none;
+      background: transparent; color: rgba(245,240,232,0.5);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: background 0.18s, color 0.18s;
+      position: relative; text-decoration: none;
+    }
+    .s-btn:hover { background: rgba(245,240,232,0.1); color: rgba(245,240,232,0.9); }
+    .s-btn.active { background: rgba(184,146,42,0.18); color: var(--gold-2); }
+    .s-btn svg { width: 18px; height: 18px; stroke-width: 1.7; }
+    .s-divider { width: 24px; height: 1px; background: rgba(245,240,232,0.1); margin: 6px 0; }
+    .user-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--gold); color: var(--cream);
+      font-weight: 600; font-size: 0.85rem;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; border: 2px solid rgba(245,240,232,0.15);
+      transition: transform 0.15s, box-shadow 0.15s; margin-top: 8px;
+    }
+    .user-avatar:hover { transform: scale(1.06); box-shadow: 0 0 0 3px rgba(212,170,82,0.3); }
+    .s-btn[data-tip]::after {
+      content: attr(data-tip); position: absolute; left: calc(100% + 10px); top: 50%; transform: translateY(-50%);
+      background: var(--ink); color: var(--cream); font-size: 0.72rem; font-weight: 500;
+      padding: 4px 10px; border-radius: 6px; white-space: nowrap;
+      pointer-events: none; opacity: 0; transition: opacity 0.15s; z-index: 99;
+    }
+    .s-btn[data-tip]:hover::after { opacity: 1; }
+
+    /* ── MAIN ── */
+    .main { margin-left: 52px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      position: sticky; top: 0; z-index: 40;
+      background: rgba(245,240,232,0.92); backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--cream-2);
+      padding: 0 24px; height: 56px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 10px; flex: 1; }
+    .topbar-title { font-size: 0.95rem; font-weight: 600; color: var(--ink); }
+    .topbar-sub { font-size: 0.82rem; color: var(--muted); }
+    .topbar-right { display: flex; align-items: center; gap: 8px; }
+
+    .btn-primary {
+      display: flex; align-items: center; gap: 7px;
+      background: var(--navy); color: var(--cream);
+      border: none; border-radius: 9px; padding: 8px 16px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.83rem; font-weight: 600;
+      cursor: pointer; transition: background 0.15s; white-space: nowrap;
+    }
+    .btn-primary:hover { background: var(--navy-2); }
+    .btn-primary svg { width: 14px; height: 14px; }
+
+    .view-toggle {
+      display: flex; align-items: center; gap: 2px;
+      background: var(--cream-2); border-radius: 8px; padding: 3px;
+    }
+    .view-btn {
+      width: 28px; height: 28px; border-radius: 6px; border: none;
+      background: transparent; color: var(--muted);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: background 0.15s, color 0.15s;
+    }
+    .view-btn svg { width: 15px; height: 15px; }
+    .view-btn.active { background: var(--white); color: var(--navy); box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+
+    /* ── BODY ── */
+    .schedule-body { display: flex; flex: 1; overflow: hidden; }
+
+    /* ── LEFT PANEL (Upcoming) ── */
+    .left-panel {
+      width: 260px; flex-shrink: 0; border-right: 1px solid var(--cream-2);
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+    .panel-header {
+      padding: 20px 16px 12px;
+      border-bottom: 1px solid var(--cream-2);
+    }
+    .panel-heading {
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem; font-weight: 700; color: var(--navy); margin-bottom: 2px;
+    }
+    .panel-sub { font-size: 0.75rem; color: var(--muted); }
+
+    .upcoming-list { flex: 1; overflow-y: auto; padding: 12px 10px; display: flex; flex-direction: column; gap: 6px; }
+
+    .upcoming-group-label {
+      font-size: 0.67rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 1.1px; color: var(--muted);
+      padding: 8px 8px 4px;
+    }
+
+    .upcoming-item {
+      background: var(--white); border: 1.5px solid var(--cream-2);
+      border-radius: 10px; padding: 10px 12px;
+      cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s;
+      position: relative; overflow: hidden;
+    }
+    .upcoming-item::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+      width: 3px; border-radius: 3px 0 0 3px;
+    }
+    .upcoming-item.type-hearing::before { background: var(--c-hearing); }
+    .upcoming-item.type-meeting::before { background: var(--c-meeting); }
+    .upcoming-item.type-deadline::before { background: var(--c-deadline); }
+    .upcoming-item.type-filing::before { background: var(--c-filing); }
+    .upcoming-item.type-other::before  { background: var(--c-other); }
+    .upcoming-item:hover { border-color: var(--gold-2); box-shadow: 0 2px 12px rgba(184,146,42,0.1); }
+
+    .ui-case { font-size: 0.8rem; font-weight: 600; color: var(--ink); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ui-meta { font-size: 0.72rem; color: var(--muted); display: flex; align-items: center; gap: 5px; }
+    .ui-type-badge {
+      display: inline-flex; align-items: center;
+      font-size: 0.67rem; font-weight: 600; padding: 2px 6px; border-radius: 4px;
+      text-transform: uppercase; letter-spacing: 0.4px;
+    }
+    .type-hearing .ui-type-badge { background: var(--c-hearing-bg); color: var(--c-hearing); }
+    .type-meeting .ui-type-badge { background: var(--c-meeting-bg); color: var(--c-meeting); }
+    .type-deadline .ui-type-badge { background: var(--c-deadline-bg); color: var(--c-deadline); }
+    .type-filing .ui-type-badge { background: var(--c-filing-bg); color: var(--c-filing); }
+    .type-other .ui-type-badge   { background: var(--c-other-bg); color: var(--c-other); }
+
+    .ui-date { font-size: 0.72rem; color: var(--muted); margin-top: 4px; }
+
+    /* ── CENTER: CALENDAR ── */
+    .calendar-wrap {
+      flex: 1; display: flex; flex-direction: column; min-width: 0;
+      padding: 24px 24px 0;
+    }
+
+    /* Month nav */
+    .month-nav {
+      display: flex; align-items: center; gap: 14px; margin-bottom: 20px;
+    }
+    .month-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.35rem; font-weight: 700; color: var(--navy);
+      flex: 1;
+    }
+    .month-btn {
+      width: 32px; height: 32px; border-radius: 8px; border: 1.5px solid var(--cream-3);
+      background: var(--white); color: var(--navy-2);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: border-color 0.15s, background 0.15s;
+    }
+    .month-btn:hover { border-color: var(--gold); background: var(--cream); }
+    .month-btn svg { width: 16px; height: 16px; }
+
+    .today-btn {
+      font-family: 'DM Sans', sans-serif; font-size: 0.8rem; font-weight: 600;
+      color: var(--gold); background: none; border: 1.5px solid var(--gold);
+      border-radius: 8px; padding: 5px 12px; cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .today-btn:hover { background: var(--gold); color: var(--white); }
+
+    /* Day labels */
+    .cal-days-header {
+      display: grid; grid-template-columns: repeat(7, 1fr);
+      gap: 4px; margin-bottom: 6px;
+    }
+    .cal-day-label {
+      text-align: center; font-size: 0.7rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted);
+      padding: 4px 0;
+    }
+
+    /* Calendar grid */
+    .cal-grid {
+      display: grid; grid-template-columns: repeat(7, 1fr);
+      gap: 4px; flex: 1;
+    }
+
+    .cal-cell {
+      min-height: 90px; border-radius: 10px;
+      border: 1.5px solid transparent;
+      background: var(--white); padding: 8px;
+      cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+      position: relative; display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    .cal-cell:hover { border-color: var(--gold-2); box-shadow: 0 2px 12px rgba(184,146,42,0.1); }
+    .cal-cell.other-month { background: transparent; border-color: transparent; opacity: 0.4; }
+    .cal-cell.other-month:hover { opacity: 0.6; background: var(--white); border-color: var(--cream-2); }
+    .cal-cell.today { border-color: var(--gold); background: rgba(184,146,42,0.04); }
+    .cal-cell.today .cal-date-num { background: var(--navy); color: var(--cream); }
+    .cal-cell.selected { border-color: var(--navy); box-shadow: 0 0 0 3px rgba(30,45,74,0.1); }
+    .cal-cell.has-events { border-color: var(--cream-3); }
+
+    .cal-date-num {
+      width: 26px; height: 26px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem; font-weight: 600; color: var(--ink);
+      flex-shrink: 0; margin-bottom: 4px; transition: background 0.15s, color 0.15s;
+      align-self: flex-start;
+    }
+
+    .cal-events { display: flex; flex-direction: column; gap: 2px; flex: 1; overflow: hidden; }
+
+    .cal-event-chip {
+      font-size: 0.68rem; font-weight: 500;
+      padding: 2px 4px 2px 6px; border-radius: 4px; line-height: 1.4;
+      display: flex; align-items: center; gap: 2px; overflow: hidden;
+    }
+    .cal-event-chip .chip-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .chip-del {
+      flex-shrink: 0; width: 13px; height: 13px; border-radius: 50%;
+      background: transparent; border: none; cursor: pointer;
+      display: none; align-items: center; justify-content: center;
+      font-size: 9px; line-height: 1; padding: 0; color: inherit; opacity: 0.65;
+    }
+    .chip-del:hover { opacity: 1; background: rgba(0,0,0,0.12); }
+    .cal-event-chip:hover .chip-del { display: flex; }
+    .chip-hearing  { background: var(--c-hearing-bg);  color: var(--c-hearing); }
+    .chip-meeting  { background: var(--c-meeting-bg);  color: var(--c-meeting); }
+    .chip-deadline { background: var(--c-deadline-bg); color: var(--c-deadline); }
+    .chip-filing   { background: var(--c-filing-bg);   color: var(--c-filing); }
+    .chip-other    { background: var(--c-other-bg);    color: var(--c-other); }
+
+    .cal-more { font-size: 0.67rem; color: var(--muted); font-weight: 500; padding: 1px 4px; }
+
+    /* ── RIGHT PANEL (Day detail) ── */
+    .right-panel {
+      width: 280px; flex-shrink: 0; border-left: 1px solid var(--cream-2);
+      display: flex; flex-direction: column; overflow: hidden;
+      transition: width 0.25s;
+    }
+    .right-panel.empty { width: 0; overflow: hidden; border-left: none; }
+
+    .day-panel-header {
+      padding: 20px 18px 14px; border-bottom: 1px solid var(--cream-2);
+    }
+    .day-panel-date {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.05rem; font-weight: 700; color: var(--navy); margin-bottom: 2px;
+    }
+    .day-panel-count { font-size: 0.75rem; color: var(--muted); }
+
+    .day-events-list { flex: 1; overflow-y: auto; padding: 12px 12px; display: flex; flex-direction: column; gap: 8px; }
+
+    .day-event-card {
+      background: var(--white); border: 1.5px solid var(--cream-2);
+      border-radius: 10px; padding: 12px 14px; position: relative; overflow: hidden;
+    }
+    .day-event-card::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+      width: 3px; border-radius: 3px 0 0 3px;
+    }
+    .day-event-card.type-hearing::before { background: var(--c-hearing); }
+    .day-event-card.type-meeting::before { background: var(--c-meeting); }
+    .day-event-card.type-deadline::before { background: var(--c-deadline); }
+    .day-event-card.type-filing::before { background: var(--c-filing); }
+    .day-event-card.type-other::before  { background: var(--c-other); }
+
+    .dec-type { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .type-hearing .dec-type  { color: var(--c-hearing); }
+    .type-meeting .dec-type  { color: var(--c-meeting); }
+    .type-deadline .dec-type { color: var(--c-deadline); }
+    .type-filing .dec-type   { color: var(--c-filing); }
+    .type-other .dec-type    { color: var(--c-other); }
+
+    .dec-case { font-size: 0.85rem; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+    .dec-row { display: flex; align-items: center; gap: 5px; font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+    .dec-row svg { width: 12px; height: 12px; flex-shrink: 0; }
+
+    .dec-actions { display: flex; gap: 6px; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--cream-2); }
+    .dec-btn {
+      font-family: 'DM Sans', sans-serif; font-size: 0.72rem; font-weight: 600;
+      border-radius: 6px; padding: 4px 10px; cursor: pointer; transition: background 0.15s;
+      border: 1.5px solid var(--cream-3); background: transparent; color: var(--navy-2);
+    }
+    .dec-btn:hover { background: var(--cream); }
+    .dec-btn.danger { border-color: transparent; color: var(--danger); }
+    .dec-btn.danger:hover { background: var(--danger-bg); }
+
+    .day-panel-add {
+      padding: 12px; border-top: 1px solid var(--cream-2);
+    }
+    .btn-add-event {
+      width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px;
+      background: var(--navy); color: var(--cream); border: none; border-radius: 9px;
+      padding: 9px; font-family: 'DM Sans', sans-serif; font-size: 0.83rem; font-weight: 600;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .btn-add-event:hover { background: var(--navy-2); }
+    .btn-add-event svg { width: 14px; height: 14px; }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(26,34,48,0.45);
+      z-index: 200; display: none; align-items: center; justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: var(--white); border-radius: 18px; padding: 28px 32px;
+      max-width: 500px; width: calc(100% - 40px);
+      box-shadow: 0 20px 60px rgba(30,45,74,0.18);
+      animation: modalIn 0.2s ease;
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.95) translateY(8px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .modal-heading {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem; font-weight: 700; color: var(--navy); margin-bottom: 4px;
+    }
+    .modal-subheading { font-size: 0.82rem; color: var(--muted); margin-bottom: 24px; }
+
+    .form-row { display: flex; gap: 14px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; flex: 1; }
+    .form-label {
+      font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.7px; color: var(--muted);
+    }
+    .form-input, .form-select, .form-textarea {
+      border: 1.5px solid var(--cream-3); border-radius: 9px;
+      padding: 9px 13px; font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem; color: var(--ink); background: var(--cream);
+      outline: none; transition: border-color 0.18s, box-shadow 0.18s;
+      width: 100%;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--gold); box-shadow: 0 0 0 3px rgba(184,146,42,0.1);
+      background: var(--white);
+    }
+    .form-textarea { resize: vertical; min-height: 72px; }
+    .form-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237a8fa3' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; cursor: pointer; }
+
+    /* Type selector pills */
+    .type-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+    .type-pill {
+      display: flex; align-items: center; gap: 5px;
+      padding: 5px 12px; border-radius: 20px; cursor: pointer;
+      border: 1.5px solid var(--cream-3); background: transparent;
+      font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 600;
+      color: var(--muted); transition: all 0.15s;
+    }
+    .type-pill .dot { width: 8px; height: 8px; border-radius: 50%; }
+    .type-pill:hover { border-color: var(--cream-2); background: var(--cream); }
+    .type-pill.active[data-type="hearing"] { border-color: var(--c-hearing); background: var(--c-hearing-bg); color: var(--c-hearing); }
+    .type-pill.active[data-type="meeting"] { border-color: var(--c-meeting); background: var(--c-meeting-bg); color: var(--c-meeting); }
+    .type-pill.active[data-type="deadline"] { border-color: var(--c-deadline); background: var(--c-deadline-bg); color: var(--c-deadline); }
+    .type-pill.active[data-type="filing"] { border-color: var(--c-filing); background: var(--c-filing-bg); color: var(--c-filing); }
+    .type-pill.active[data-type="other"] { border-color: var(--c-other); background: var(--c-other-bg); color: var(--c-other); }
+
+    .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px; }
+    .btn-cancel {
+      padding: 9px 18px; border-radius: 9px; background: transparent;
+      border: 1.5px solid var(--cream-3); color: var(--navy-2);
+      font-family: 'DM Sans', sans-serif; font-size: 0.83rem; font-weight: 600;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .btn-cancel:hover { background: var(--cream); }
+    .btn-confirm {
+      padding: 9px 22px; border-radius: 9px; background: var(--navy); color: var(--cream);
+      border: none; font-family: 'DM Sans', sans-serif; font-size: 0.83rem; font-weight: 600;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .btn-confirm:hover { background: var(--navy-2); }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(60px);
+      background: var(--navy); color: var(--cream);
+      padding: 10px 22px; border-radius: 30px;
+      font-size: 0.8rem; font-weight: 500;
+      box-shadow: 0 4px 20px rgba(30,45,74,0.2);
+      transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+      z-index: 999; pointer-events: none;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ── EMPTY DAY STATE ── */
+    .day-empty {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; flex: 1; gap: 8px; padding: 24px; text-align: center;
+    }
+    .day-empty svg { opacity: 0.25; }
+    .day-empty-text { font-size: 0.8rem; color: var(--muted); line-height: 1.5; }
+
+    /* Legend */
+    .legend { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.72rem; color: var(--muted); }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+    /* ── EDITABLE TITLES ── */
+    [contenteditable] {
+      outline: none; border-radius: 5px; padding: 2px 5px; margin: -2px -5px;
+      transition: background 0.15s, box-shadow 0.15s;
+      cursor: text;
+    }
+    [contenteditable]:hover { background: rgba(184,146,42,0.08); }
+    [contenteditable]:focus {
+      background: var(--white);
+      box-shadow: 0 0 0 2px var(--gold);
+    }
+
+    /* ── CELL QUICK-ADD BUTTON ── */
+    .cal-cell-add {
+      display: none; align-items: center; justify-content: center;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: var(--gold); color: var(--white);
+      font-size: 14px; line-height: 1; border: none;
+      cursor: pointer; position: absolute; bottom: 6px; right: 6px;
+      transition: transform 0.12s, box-shadow 0.12s;
+      font-weight: 300;
+    }
+    .cal-cell:hover .cal-cell-add { display: flex; }
+    .cal-cell-add:hover { transform: scale(1.15); box-shadow: 0 2px 8px rgba(184,146,42,0.35); }
+
+    /* ── INLINE EVENT EDIT (day panel) ── */
+    .dec-field {
+      border: none; outline: none; background: transparent;
+      font-family: 'DM Sans', sans-serif; color: inherit;
+      width: 100%; border-radius: 4px; padding: 2px 4px; margin: -2px -4px;
+      transition: background 0.15s, box-shadow 0.15s;
+    }
+    .dec-field:hover { background: var(--cream); }
+    .dec-field:focus { background: var(--white); box-shadow: 0 0 0 2px var(--gold); }
+    .dec-field.case-field { font-size: 0.85rem; font-weight: 600; }
+    .dec-field.meta-field { font-size: 0.75rem; color: var(--muted); }
+    .dec-field.time-field { font-size: 0.75rem; color: var(--muted); width: auto; }
+
+    .dec-type-select {
+      border: none; outline: none; background: transparent;
+      font-family: 'DM Sans', sans-serif; font-size: 0.68rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      cursor: pointer; padding: 2px 4px; margin: -2px -4px; border-radius: 4px;
+      appearance: none; -webkit-appearance: none;
+    }
+    .type-hearing .dec-type-select  { color: var(--c-hearing); }
+    .type-meeting .dec-type-select  { color: var(--c-meeting); }
+    .type-deadline .dec-type-select { color: var(--c-deadline); }
+    .type-filing .dec-type-select   { color: var(--c-filing); }
+    .type-other .dec-type-select    { color: var(--c-other); }
+    .dec-type-select:hover { background: var(--cream); }
+      .left-panel { display: none; }
+      .right-panel { width: 0; border: none; }
+    }
+    @media (max-width: 700px) {
+      .sidebar { position: fixed; bottom: 0; left: 0; right: 0; width: 100%; height: 56px; flex-direction: row; padding: 0 8px; top: auto; border-right: none; border-top: 1px solid rgba(255,255,255,0.08); z-index: 100; }
+      .sidebar-top { flex-direction: row; flex: 1; justify-content: space-around; align-items: center; gap: 0; }
+      .sidebar-bottom { flex-direction: row; align-items: center; }
+      .s-divider { display: none; }
+      .user-avatar { margin-top: 0; margin-left: 6px; }
+      .main { margin-left: 0; padding-bottom: 56px; }
+      .cal-cell { min-height: 60px; }
+    }
+    /* ── NOTIFICATION BELL ── */
+    .notif-btn {
+      position: relative;
+      width: 36px; height: 36px;
+      border-radius: 9px; border: none;
+      background: transparent;
+      color: var(--navy-2);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      flex-shrink: 0;
+    }
+    .notif-btn:hover { background: var(--cream-2); color: var(--navy); }
+    .notif-btn svg { width: 18px; height: 18px; stroke-width: 1.7; }
+    .notif-badge {
+      display: none;
+      position: absolute; top: 4px; right: 4px;
+      min-width: 16px; height: 16px;
+      background: var(--danger); color: var(--white);
+      border-radius: 8px; border: 2px solid var(--cream);
+      font-size: 0.6rem; font-weight: 700;
+      align-items: center; justify-content: center;
+      line-height: 1; padding: 0 3px;
+    }
+    .notif-badge.show { display: flex; }
+
+    /* Notification panel */
+    .notif-panel {
+      position: fixed; top: 62px; right: 16px;
+      width: 340px;
+      background: var(--white);
+      border: 1px solid var(--cream-2);
+      border-radius: 16px;
+      box-shadow: 0 12px 48px rgba(30,45,74,0.16);
+      z-index: 500;
+      opacity: 0; pointer-events: none;
+      transform: translateY(-8px) scale(0.97);
+      transform-origin: top right;
+      transition: opacity 0.18s, transform 0.18s;
+      overflow: hidden;
+    }
+    .notif-panel.open { opacity: 1; pointer-events: all; transform: translateY(0) scale(1); }
+
+    .notif-panel-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 18px 12px;
+      border-bottom: 1px solid var(--cream-2);
+    }
+    .notif-panel-title {
+      font-size: 0.9rem; font-weight: 700; color: var(--ink);
+      font-family: 'Playfair Display', serif;
+    }
+    .notif-mark-read {
+      font-size: 0.75rem; font-weight: 500; color: var(--gold);
+      background: none; border: none; cursor: pointer;
+      transition: color 0.15s; padding: 0;
+    }
+    .notif-mark-read:hover { color: var(--navy); }
+
+    .notif-list { max-height: 380px; overflow-y: auto; }
+    .notif-list::-webkit-scrollbar { width: 4px; }
+    .notif-list::-webkit-scrollbar-thumb { background: var(--cream-3); border-radius: 2px; }
+
+    .notif-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--cream-2);
+      cursor: pointer;
+      transition: background 0.13s;
+      position: relative;
+    }
+    .notif-item:last-child { border-bottom: none; }
+    .notif-item:hover { background: var(--cream); }
+    .notif-item.unread { background: rgba(184,146,42,0.04); }
+    .notif-item.unread:hover { background: rgba(184,146,42,0.08); }
+
+    .notif-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--gold); flex-shrink: 0; margin-top: 6px;
+      transition: opacity 0.2s;
+    }
+    .notif-item:not(.unread) .notif-dot { opacity: 0; }
+
+    .notif-icon {
+      width: 34px; height: 34px; border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .notif-icon.hearing { background: rgba(41,128,185,0.12); color: #2980b9; }
+    .notif-icon.deadline { background: rgba(192,57,43,0.1); color: var(--danger); }
+    .notif-icon.upload { background: rgba(39,174,96,0.1); color: var(--success); }
+    .notif-icon.reminder { background: rgba(184,146,42,0.13); color: var(--gold); }
+    .notif-icon svg { width: 16px; height: 16px; stroke-width: 1.8; }
+
+    .notif-body { flex: 1; min-width: 0; }
+    .notif-body-title {
+      font-size: 0.83rem; font-weight: 600; color: var(--ink);
+      margin-bottom: 2px; line-height: 1.3;
+    }
+    .notif-body-text {
+      font-size: 0.76rem; color: var(--muted); line-height: 1.45;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .notif-time {
+      font-size: 0.68rem; color: var(--muted); flex-shrink: 0; padding-top: 3px;
+    }
+
+    .notif-empty {
+      padding: 36px 18px; text-align: center;
+      font-size: 0.83rem; color: var(--muted); line-height: 1.5;
+    }
+    .notif-empty svg { width: 32px; height: 32px; stroke: var(--cream-3); margin-bottom: 10px; }
+
+  </style>
+  <script src="api-client.js"></script>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+    <div class="sidebar-top">
+      <a href="advohq-home.html" class="s-btn" data-tip="Home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9.5z"/><polyline points="9 21 9 12 15 12 15 21"/></svg>
+      </a>
+      <div class="s-divider"></div>
+      <a href="advohq-file.html" class="s-btn" data-tip="Editor">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      </a>
+      <a href="advohq-schedule.html" class="s-btn active" data-tip="Schedule">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      </a>
+      <div class="s-divider"></div>
+      <a href="advohq-settings.html" class="s-btn" data-tip="Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </a>
+    </div>
+    <div class="sidebar-bottom">
+      <div class="user-avatar">T</div>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <div class="main">
+
+    <!-- TOP BAR -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--gold)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span class="topbar-title" id="pageTitle" contenteditable="true" spellcheck="false" title="Click to rename">Case Schedule</span>
+        <span class="topbar-sub" id="pageSub" contenteditable="true" spellcheck="false" title="Click to edit">Hearings, deadlines &amp; meetings</span>
+      </div>
+      <div class="topbar-right">
+        <!-- Notification Bell -->
+        <button class="notif-btn" id="notifBtn" onclick="toggleNotifPanel(event)" title="Notifications">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="notif-badge" id="notifBadge"></span>
+        </button>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:var(--c-hearing)"></div>Hearing</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--c-meeting)"></div>Meeting</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--c-deadline)"></div>Deadline</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--c-filing)"></div>Filing</div>
+        </div>
+        <button class="btn-primary" onclick="openModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Event
+        </button>
+      </div>
+    </div>
+
+    <div class="schedule-body">
+
+      <!-- LEFT PANEL: UPCOMING -->
+      <div class="left-panel">
+        <div class="panel-header">
+          <div class="panel-heading">Upcoming</div>
+          <div class="panel-sub">Next 30 days</div>
+        </div>
+        <div class="upcoming-list" id="upcomingList"></div>
+      </div>
+
+      <!-- CALENDAR -->
+      <div class="calendar-wrap">
+        <div class="month-nav">
+          <div id="monthTitle" class="month-title"></div>
+          <button class="today-btn" onclick="goToday()">Today</button>
+          <button class="month-btn" onclick="changeMonth(-1)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <button class="month-btn" onclick="changeMonth(1)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+        <div class="cal-days-header">
+          <div class="cal-day-label">Sun</div>
+          <div class="cal-day-label">Mon</div>
+          <div class="cal-day-label">Tue</div>
+          <div class="cal-day-label">Wed</div>
+          <div class="cal-day-label">Thu</div>
+          <div class="cal-day-label">Fri</div>
+          <div class="cal-day-label">Sat</div>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+      </div>
+
+      <!-- RIGHT PANEL: DAY DETAIL -->
+      <div class="right-panel" id="rightPanel">
+        <div class="day-panel-header">
+          <div class="day-panel-date" id="dayPanelDate">—</div>
+          <div class="day-panel-count" id="dayPanelCount">No events</div>
+        </div>
+        <div class="day-events-list" id="dayEventsList">
+          <div class="day-empty">
+            <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="var(--muted)" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>
+            <div class="day-empty-text">Click a date on the<br>calendar to view events</div>
+          </div>
+        </div>
+        <div class="day-panel-add">
+          <button class="btn-add-event" id="dayAddBtn" onclick="openModalForSelected()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add event on this day
+          </button>
+        </div>
+      </div>
+
+    </div><!-- /schedule-body -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ── ADD/EDIT MODAL ── -->
+<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal-box">
+    <div class="modal-heading" id="modalHeading">Schedule Case Event</div>
+    <div class="modal-subheading" id="modalSubheading">Add a hearing, meeting, deadline or filing date</div>
+
+    <div class="form-group">
+      <div class="form-label">Event Type</div>
+      <div class="type-pills">
+        <button class="type-pill active" data-type="hearing" onclick="selectType(this)">
+          <span class="dot" style="background:var(--c-hearing)"></span> Hearing
+        </button>
+        <button class="type-pill" data-type="meeting" onclick="selectType(this)">
+          <span class="dot" style="background:var(--c-meeting)"></span> Meeting
+        </button>
+        <button class="type-pill" data-type="deadline" onclick="selectType(this)">
+          <span class="dot" style="background:var(--c-deadline)"></span> Deadline
+        </button>
+        <button class="type-pill" data-type="filing" onclick="selectType(this)">
+          <span class="dot" style="background:var(--c-filing)"></span> Filing
+        </button>
+        <button class="type-pill" data-type="other" onclick="selectType(this)">
+          <span class="dot" style="background:var(--c-other)"></span> Other
+        </button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="form-label">Case Name / Title</div>
+      <input class="form-input" id="fCaseName" type="text" placeholder="e.g. State v. Johnson — Bail Hearing"/>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <div class="form-label">Date</div>
+        <input class="form-input" id="fDate" type="date"/>
+      </div>
+      <div class="form-group">
+        <div class="form-label">Time</div>
+        <input class="form-input" id="fTime" type="time" value="10:00"/>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <div class="form-label">Court / Location</div>
+        <input class="form-input" id="fLocation" type="text" placeholder="e.g. District Court, Room 4"/>
+      </div>
+      <div class="form-group">
+        <div class="form-label">Judge / Panel</div>
+        <input class="form-input" id="fJudge" type="text" placeholder="e.g. Hon. Sharma"/>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="form-label">Notes</div>
+      <textarea class="form-textarea" id="fNotes" placeholder="Any additional details about this event…"></textarea>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-confirm" onclick="saveEvent()">Save Event</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toastEl"></div>
+
+<script>
+  // ── DATA ──
+  const today = new Date();
+  let curYear  = today.getFullYear();
+  let curMonth = today.getMonth();
+  let selectedDate = null; // 'YYYY-MM-DD'
+  let editingId = null;
+
+  // Wipe old demo seed data (ids 1–8) so the calendar starts clean
+  (function() {
+    try {
+      const stored = localStorage.getItem('advohq_events');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        const oldIds = new Set([1,2,3,4,5,6,7,8]);
+        if (parsed.length > 0 && parsed.every(e => oldIds.has(e.id))) {
+          localStorage.removeItem('advohq_events');
+        }
+      }
+    } catch {}
+  })();
+
+  let events = loadEvents() || seedEvents();
+
+  function seedEvents() {
+    return [];
+  }
+
+  function loadEvents() {
+    try { const d = localStorage.getItem('advohq_events'); return d ? JSON.parse(d) : null; } catch { return null; }
+  }
+  function saveEvents() {
+    try { localStorage.setItem('advohq_events', JSON.stringify(events)); } catch {}
+  }
+
+  // ── RENDER ──
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const DAYS   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+  function render() {
+    renderMonthTitle();
+    renderCalendar();
+    renderUpcoming();
+    if (selectedDate) renderDayPanel(selectedDate);
+  }
+
+  function renderMonthTitle() {
+    document.getElementById('monthTitle').textContent = `${MONTHS[curMonth]} ${curYear}`;
+  }
+
+  function renderCalendar() {
+    const grid = document.getElementById('calGrid');
+    const first = new Date(curYear, curMonth, 1);
+    const last  = new Date(curYear, curMonth+1, 0);
+    const startDay = first.getDay();
+    const todayStr = fmtDate(today);
+
+    let html = '';
+
+    // leading days from prev month
+    for (let i = 0; i < startDay; i++) {
+      const d = new Date(curYear, curMonth, 1 - (startDay - i));
+      html += renderCell(d, true, todayStr);
+    }
+    // current month days
+    for (let d = 1; d <= last.getDate(); d++) {
+      const dt = new Date(curYear, curMonth, d);
+      html += renderCell(dt, false, todayStr);
+    }
+    // trailing days
+    const trailing = (7 - (startDay + last.getDate()) % 7) % 7;
+    for (let i = 1; i <= trailing; i++) {
+      const dt = new Date(curYear, curMonth+1, i);
+      html += renderCell(dt, true, todayStr);
+    }
+
+    grid.innerHTML = html;
+  }
+
+  function renderCell(dt, otherMonth, todayStr) {
+    const key = fmtDate(dt);
+    const dayEvents = events.filter(e => e.date === key);
+    const isToday = key === todayStr;
+    const isSelected = key === selectedDate;
+
+    let cls = 'cal-cell';
+    if (otherMonth) cls += ' other-month';
+    if (isToday) cls += ' today';
+    if (isSelected) cls += ' selected';
+    if (dayEvents.length > 0) cls += ' has-events';
+
+    const maxShow = 3;
+    const chips = dayEvents.slice(0, maxShow).map(e =>
+      `<div class="cal-event-chip chip-${e.type}" title="${e.caseName}">
+        <span class="chip-name">${e.caseName}</span>
+        <button class="chip-del" onclick="event.stopPropagation();deleteEventDirect(${e.id})" title="Remove">✕</button>
+      </div>`
+    ).join('');
+    const more = dayEvents.length > maxShow ? `<div class="cal-more">+${dayEvents.length - maxShow} more</div>` : '';
+
+    return `<div class="${cls}" onclick="selectDay('${key}')">
+      <div class="cal-date-num">${dt.getDate()}</div>
+      <div class="cal-events">${chips}${more}</div>
+      <button class="cal-cell-add" onclick="event.stopPropagation();openModal('${key}')" title="Add event">+</button>
+    </div>`;
+  }
+
+  function renderUpcoming() {
+    const list = document.getElementById('upcomingList');
+    const now = new Date(); now.setHours(0,0,0,0);
+    const limit = new Date(now); limit.setDate(limit.getDate() + 30);
+
+    const upcoming = events
+      .filter(e => { const d = new Date(e.date); return d >= now && d <= limit; })
+      .sort((a,b) => a.date.localeCompare(b.date));
+
+    if (!upcoming.length) {
+      list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:0.8rem;">No upcoming events in the next 30 days</div>';
+      return;
+    }
+
+    // Group by date label
+    let html = '';
+    let lastGroup = '';
+    upcoming.forEach(e => {
+      const eDate = new Date(e.date + 'T00:00:00');
+      const label = getDateLabel(eDate);
+      if (label !== lastGroup) {
+        html += `<div class="upcoming-group-label">${label}</div>`;
+        lastGroup = label;
+      }
+      html += `<div class="upcoming-item type-${e.type}" onclick="selectDay('${e.date}')">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">
+          <div class="ui-type-badge">${e.type}</div>
+          <span style="font-size:0.72rem;color:var(--muted)">${formatTime(e.time)}</span>
+        </div>
+        <div class="ui-case">${e.caseName}</div>
+        <div class="ui-date">${e.location || 'No location set'}</div>
+      </div>`;
+    });
+    list.innerHTML = html;
+  }
+
+  function getDateLabel(d) {
+    const now = new Date(); now.setHours(0,0,0,0);
+    const diff = Math.round((d - now) / 86400000);
+    if (diff === 0) return 'Today';
+    if (diff === 1) return 'Tomorrow';
+    if (diff < 7) return DAYS[d.getDay()];
+    return `${MONTHS[d.getMonth()].slice(0,3)} ${d.getDate()}`;
+  }
+
+  function renderDayPanel(dateKey) {
+    const dt = new Date(dateKey + 'T00:00:00');
+    const label = `${DAYS[dt.getDay()]}, ${MONTHS[dt.getMonth()]} ${dt.getDate()}, ${dt.getFullYear()}`;
+    document.getElementById('dayPanelDate').textContent = label;
+
+    const dayEvents = events.filter(e => e.date === dateKey).sort((a,b) => (a.time||'').localeCompare(b.time||''));
+    const count = dayEvents.length;
+    document.getElementById('dayPanelCount').textContent = count === 0 ? 'No events' : `${count} event${count !== 1 ? 's' : ''}`;
+
+    const list = document.getElementById('dayEventsList');
+    if (!count) {
+      list.innerHTML = `<div class="day-empty">
+        <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="var(--muted)" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <div class="day-empty-text">No events scheduled<br>for this day</div>
+      </div>`;
+      return;
+    }
+
+    list.innerHTML = dayEvents.map(e => `
+      <div class="day-event-card type-${e.type}" id="card-${e.id}">
+        <select class="dec-type-select" onchange="inlineChange(${e.id},'type',this.value,this)" title="Change type">
+          <option value="hearing"  ${e.type==='hearing'  ?'selected':''}>HEARING</option>
+          <option value="meeting"  ${e.type==='meeting'  ?'selected':''}>MEETING</option>
+          <option value="deadline" ${e.type==='deadline' ?'selected':''}>DEADLINE</option>
+          <option value="filing"   ${e.type==='filing'   ?'selected':''}>FILING</option>
+          <option value="other"    ${e.type==='other'    ?'selected':''}>OTHER</option>
+        </select>
+        <input class="dec-field case-field" value="${esc(e.caseName)}" placeholder="Case name…"
+          onchange="inlineChange(${e.id},'caseName',this.value)"/>
+        <div class="dec-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <input class="dec-field time-field" type="time" value="${e.time||''}"
+            onchange="inlineChange(${e.id},'time',this.value)" title="Change time"/>
+        </div>
+        <div class="dec-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <input class="dec-field meta-field" value="${esc(e.location||'')}" placeholder="Add location…"
+            onchange="inlineChange(${e.id},'location',this.value)"/>
+        </div>
+        <div class="dec-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <input class="dec-field meta-field" value="${esc(e.judge||'')}" placeholder="Add judge…"
+            onchange="inlineChange(${e.id},'judge',this.value)"/>
+        </div>
+        <div class="dec-row" style="margin-top:4px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <input class="dec-field meta-field" value="${esc(e.notes||'')}" placeholder="Add notes…"
+            onchange="inlineChange(${e.id},'notes',this.value)"/>
+        </div>
+        <div class="dec-actions">
+          <button class="dec-btn danger" onclick="deleteEvent(${e.id})">Delete</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ── INTERACTION ──
+  function selectDay(dateKey) {
+    selectedDate = dateKey;
+    // If different month, navigate
+    const d = new Date(dateKey + 'T00:00:00');
+    if (d.getFullYear() !== curYear || d.getMonth() !== curMonth) {
+      curYear = d.getFullYear(); curMonth = d.getMonth();
+    }
+    renderCalendar();
+    renderDayPanel(dateKey);
+    document.getElementById('rightPanel').classList.remove('empty');
+  }
+
+  function changeMonth(delta) {
+    curMonth += delta;
+    if (curMonth > 11) { curMonth = 0; curYear++; }
+    if (curMonth < 0)  { curMonth = 11; curYear--; }
+    render();
+  }
+
+  function goToday() {
+    curYear = today.getFullYear(); curMonth = today.getMonth();
+    selectedDate = fmtDate(today);
+    render();
+  }
+
+  // ── MODAL ──
+  let selectedType = 'hearing';
+
+  function openModal(prefillDate) {
+    editingId = null;
+    selectedType = 'hearing';
+    document.getElementById('modalHeading').textContent = 'Schedule Case Event';
+    document.getElementById('modalSubheading').textContent = 'Add a hearing, meeting, deadline or filing date';
+
+    // Reset type pills
+    document.querySelectorAll('.type-pill').forEach(p => p.classList.remove('active'));
+    document.querySelector('.type-pill[data-type="hearing"]').classList.add('active');
+
+    document.getElementById('fCaseName').value = '';
+    document.getElementById('fDate').value = prefillDate || (selectedDate || fmtDate(today));
+    document.getElementById('fTime').value = '10:00';
+    document.getElementById('fLocation').value = '';
+    document.getElementById('fJudge').value = '';
+    document.getElementById('fNotes').value = '';
+
+    document.getElementById('modalOverlay').classList.add('open');
+    setTimeout(() => document.getElementById('fCaseName').focus(), 120);
+  }
+
+  function openModalForSelected() {
+    openModal(selectedDate || fmtDate(today));
+  }
+
+  function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('open');
+    editingId = null;
+  }
+
+  function handleOverlayClick(e) {
+    if (e.target === document.getElementById('modalOverlay')) closeModal();
+  }
+
+  function selectType(btn) {
+    document.querySelectorAll('.type-pill').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    selectedType = btn.dataset.type;
+  }
+
+  function saveEvent() {
+    const caseName = document.getElementById('fCaseName').value.trim();
+    const date     = document.getElementById('fDate').value;
+    if (!caseName) { document.getElementById('fCaseName').focus(); toast('Please enter a case name'); return; }
+    if (!date)     { document.getElementById('fDate').focus(); toast('Please select a date'); return; }
+
+    const payload = {
+      type: selectedType,
+      caseName,
+      date,
+      time:     document.getElementById('fTime').value,
+      location: document.getElementById('fLocation').value.trim(),
+      judge:    document.getElementById('fJudge').value.trim(),
+      notes:    document.getElementById('fNotes').value.trim(),
+    };
+
+    if (editingId) {
+      const idx = events.findIndex(x => x.id === editingId);
+      if (idx !== -1) events[idx] = { ...events[idx], ...payload };
+      toast('Event updated');
+    } else {
+      payload.id = Date.now();
+      events.push(payload);
+      toast('Event scheduled');
+    }
+
+    saveEvents();
+    // Sync date back to library if this event originated from a library file
+    const savedEvt = editingId
+      ? events.find(x => x.id === editingId)
+      : events[events.length - 1];
+    if (savedEvt) syncEventToLibrary(savedEvt);
+    closeModal();
+    selectedDate = date;
+    // Sync calendar month
+    const d = new Date(date + 'T00:00:00');
+    curYear = d.getFullYear(); curMonth = d.getMonth();
+    render();
+  }
+
+  function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
+  // ── DATE SYNC: SCHEDULE → HOME ──
+  function syncEventToLibrary(evt) {
+    try {
+      if (!evt || !evt._libFileId) return;
+      let lib = JSON.parse(localStorage.getItem('advohq_library_v2') || '[]');
+      const file = lib.find(f => f.id === evt._libFileId);
+      if (!file) return;
+      file[evt._libField] = evt.date;
+      localStorage.setItem('advohq_library_v2', JSON.stringify(lib));
+    } catch {}
+  }
+
+  function inlineChange(id, field, value, el) {
+    const e = events.find(x => x.id === id);
+    if (!e) return;
+    e[field] = value;
+    saveEvents();
+    // If type changed, update card class + select color without full re-render
+    if (field === 'type') {
+      const card = document.getElementById('card-' + id);
+      if (card) {
+        card.className = `day-event-card type-${value}`;
+      }
+    }
+    // Re-render calendar chips & upcoming list
+    renderCalendar();
+    renderUpcoming();
+  }
+
+  function deleteEventDirect(id) {
+    events = events.filter(x => x.id !== id);
+    saveEvents();
+    toast('Event removed');
+    render();
+    if (selectedDate) renderDayPanel(selectedDate);
+  }
+
+  function deleteEvent(id) {
+    if (!confirm('Delete this event?')) return;
+    events = events.filter(x => x.id !== id);
+    saveEvents();
+    toast('Event deleted');
+    render();
+    if (selectedDate) renderDayPanel(selectedDate);
+  }
+
+  // ── UTILS ──
+  function fmtDate(d) {
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+
+  function formatTime(t) {
+    if (!t) return '';
+    const [h, m] = t.split(':').map(Number);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    return `${((h % 12) || 12)}:${String(m).padStart(2,'0')} ${ampm}`;
+  }
+
+  // ── TOAST ──
+  let toastTimer;
+  function toast(msg) {
+    const el = document.getElementById('toastEl');
+    el.textContent = msg; el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+  }
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
+    if (e.key === 'n' && !e.target.closest('input,textarea,select') && !document.getElementById('modalOverlay').classList.contains('open')) {
+      openModal();
+    }
+  });
+
+  // ── INIT ──
+  render();
+  // Auto-select today
+  selectedDate = fmtDate(today);
+  renderDayPanel(selectedDate);
+
+  // ── NOTIFICATIONS ──
+  const NOTIF_READ_KEY = 'advohq_notif_read';
+
+  async function renderNotifPanel() {
+    const list = document.getElementById('notifList');
+    if (!list) return;
+    list.innerHTML = '<div class="notif-empty" style="padding:24px;text-align:center;color:var(--muted);font-size:0.82rem;">Loading…</div>';
+
+    try {
+      const { notifications, unread_count } = await API.getNotifications();
+      updateBadge(unread_count);
+
+      if (!notifications || notifications.length === 0) {
+        list.innerHTML = `<div class="notif-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="width:32px;height:32px;stroke:var(--cream-3);margin-bottom:10px;display:block;margin-left:auto;margin-right:auto"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>You\'re all caught up!</div>`;
+        return;
+      }
+
+      const iconMap = {
+        day_of:      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
+        reminder_1d: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+      };
+      const typeClass = { day_of: 'deadline', reminder_1d: 'hearing' };
+
+      list.innerHTML = notifications.map(n => {
+        const unread = !n.is_read;
+        const icon   = iconMap[n.type] || iconMap.reminder_1d;
+        const cls    = typeClass[n.type] || 'reminder';
+        const time   = n.type === 'day_of' ? 'Today' : 'Tomorrow';
+        return `<div class="notif-item${unread ? ' unread' : ''}" onclick="readNotif(${n.id})">
+          <div class="notif-dot"></div>
+          <div class="notif-icon ${cls}">${icon}</div>
+          <div class="notif-body">
+            <div class="notif-body-title">${n.title}</div>
+            <div class="notif-body-text">${n.body || ''}</div>
+          </div>
+          <div class="notif-time">${time}</div>
+        </div>`;
+      }).join('');
+    } catch(e) {
+      list.innerHTML = '<div class="notif-empty" style="padding:24px;text-align:center;color:var(--muted);font-size:0.82rem;">Could not load notifications.</div>';
+    }
+  }
+
+  function updateBadge(count) {
+    const badge = document.getElementById('notifBadge');
+    if (!badge) return;
+    badge.textContent = count > 9 ? '9+' : count;
+    badge.classList.toggle('show', count > 0);
+  }
+
+  async function readNotif(id) {
+    try { await API.markNotificationRead(id); } catch(e) {}
+    renderNotifPanel();
+  }
+
+  async function markAllRead() {
+    try { await API.markAllNotificationsRead(); } catch(e) {}
+    renderNotifPanel();
+  }
+
+  let notifOpen = false;
+  function toggleNotifPanel() {
+    notifOpen = !notifOpen;
+    const panel = document.getElementById('notifPanel');
+    if (notifOpen) { renderNotifPanel(); panel.classList.add('open'); }
+    else { panel.classList.remove('open'); }
+  }
+
+  // Close panel on outside click
+  document.addEventListener('click', function(e) {
+    if (!notifOpen) return;
+    const panel = document.getElementById('notifPanel');
+    if (panel && !panel.contains(e.target)) {
+      notifOpen = false; panel.classList.remove('open');
+    }
+  });
+
+  // Poll badge count every 60s
+  async function pollNotifCount() {
+    try {
+      const { unread_count } = await API.getNotificationCount();
+      updateBadge(unread_count);
+    } catch(e) {}
+  }
+
+  // Init badge + start polling
+  pollNotifCount();
+  setInterval(pollNotifCount, 60000);
+</script>
+<!-- Notification Panel -->
+<div class="notif-panel" id="notifPanel">
+  <div class="notif-panel-header">
+    <span class="notif-panel-title">Notifications</span>
+    <button class="notif-mark-read" onclick="markAllRead()">Mark all as read</button>
+  </div>
+  <div class="notif-list" id="notifList"></div>
+</div>
+
+</body>
+</html>
